@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
+
+class Device extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'name',
+        'manufacturer',
+        'model',
+        'os',
+        'os_version',
+        'phone_number',
+        'status',
+        'consent_recorded',
+        'consented_at',
+        'agent_token',
+        'last_seen_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'consent_recorded' => 'boolean',
+            'consented_at' => 'datetime',
+            'last_seen_at' => 'datetime',
+        ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function calls(): HasMany
+    {
+        return $this->hasMany(DeviceCall::class);
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(DeviceMessage::class);
+    }
+
+    public function locations(): HasMany
+    {
+        return $this->hasMany(DeviceLocation::class);
+    }
+
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(Alert::class);
+    }
+
+    public static function generateToken(): string
+    {
+        return Str::random(64);
+    }
+
+    public function isOnline(): bool
+    {
+        return $this->last_seen_at?->gt(now()->subMinutes(5)) ?? false;
+    }
+}
