@@ -43,6 +43,12 @@ class DeviceManagementTest extends TestCase
         $device = Device::first();
         $this->assertEquals(64, strlen($device->agent_token));
         $this->assertTrue($device->agent_token !== Device::generateToken());
+
+        $this->assertDatabaseHas('consents', [
+            'user_id' => $user->id,
+            'device_id' => $device->id,
+            'type' => 'enrollment',
+        ]);
     }
 
     public function test_device_enrollment_requires_consent()
@@ -92,6 +98,12 @@ class DeviceManagementTest extends TestCase
             'consent_recorded' => true,
         ]);
         $this->assertNotNull($device->fresh()->consented_at);
+
+        $this->assertDatabaseHas('consents', [
+            'user_id' => $user->id,
+            'device_id' => $device->id,
+            'type' => 'enrollment',
+        ]);
     }
 
     public function test_user_can_suspend_and_reactivate_device()

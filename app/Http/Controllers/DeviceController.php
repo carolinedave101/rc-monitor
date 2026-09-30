@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Consent;
 use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,9 +11,17 @@ class DeviceController extends Controller
 {
     public function index()
     {
-        $devices = Device::where('user_id', Auth::id())->orderByDesc('created_at')->get();
+        $user = Auth::user();
 
-        return view('devices.index', compact('devices'));
+        $devices = Device::visibleTo($user)
+            ->with('user')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $ownDevices = $devices->where('user_id', $user->id);
+        $sharedDevices = $devices->where('user_id', '!=', $user->id);
+
+        return view('devices.index', compact('ownDevices', 'sharedDevices'));
     }
 
     public function create()
@@ -37,13 +46,17 @@ class DeviceController extends Controller
             'agent_token' => Device::generateToken(),
         ]));
 
+        $this->recordConsent($request, $device, 'enrollment');
+
         return redirect()->route('devices.show', $device)
             ->with('status', 'Device enrolled. Install the agent with the token below and it will activate on first check-in.');
     }
 
     public function show(Request $request, Device $device)
     {
-        $this->authorizeDevice($device);
+        $this->authorizeView($device);
+
+        $isOwner = $device->user_id === Auth::id();
 
         $validTabs = [
             'overview', 'calls', 'messages', 'locations', 'alerts',
@@ -72,9 +85,15 @@ class DeviceController extends Controller
         $notes = $device->notes()->latest('updated_at')->limit(100)->get();
         $calendar = $device->calendarEvents()->latest('starts_at')->limit(100)->get();
 
+        $shares = $isOwner
+            ? $device->shares()->whereIn('status', ['pending', 'accepted'])->with('viewer')->latest()->get()
+            : collect();
+
         return view('devices.show', compact(
             'device',
             'tab',
+            'isOwner',
+            'shares',
             'calls',
             'messages',
             'locations',
@@ -93,7 +112,7 @@ class DeviceController extends Controller
 
     public function destroy(Device $device)
     {
-        $this->authorizeDevice($device);
+        $this->authorizeOwner($device);
         $name = $device->name;
         $device->delete();
 
@@ -102,7 +121,7 @@ class DeviceController extends Controller
 
     public function updateStatus(Request $request, Device $device)
     {
-        $this->authorizeDevice($device);
+        $this->authorizeOwner($device);
 
         $status = $request->validate(['status' => 'required|in:pending,active,suspended'])['status'];
 
@@ -117,9 +136,9 @@ class DeviceController extends Controller
         return redirect()->route('devices.show', $device)->with('status', $labels[$status]);
     }
 
-    public function markConsented(Device $device)
+    public function markConsented(Request $request, Device $device)
     {
-        $this->authorizeDevice($device);
+        $this->authorizeOwner($device);
 
         $device->update([
             'consent_recorded' => true,
@@ -127,11 +146,36 @@ class DeviceController extends Controller
             'status' => 'active',
         ]);
 
+        $this->recordConsent($request, $device, 'enrollment');
+
         return redirect()->route('devices.show', $device)->with('status', 'Consent recorded. Device is now active.');
     }
 
-    private function authorizeDevice(Device $device): void
+    private function recordConsent(Request $request, Device $device, string $type): void
+    {
+        Consent::create([
+            'user_id' => Auth::id(),
+            'device_id' => $device->id,
+            'type' => $type,
+            'method' => 'in_app',
+            'ip_address' => $request->ip(),
+            'user_agent' => substr((string) $request->userAgent(), 0, 255),
+            'consented_at' => now(),
+        ]);
+    }
+
+    private function authorizeOwner(Device $device): void
     {
         abort_unless($device->user_id === Auth::id(), 403);
+    }
+
+    private function authorizeView(Device $device): void
+    {
+        $user = Auth::user();
+
+        abort_unless(
+            $device->user_id === $user->id || $device->isSharedWith($user),
+            403,
+        );
     }
 }

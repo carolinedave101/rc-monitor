@@ -47,7 +47,9 @@ class LiveController extends Controller
 
     public function device(Request $request, Device $device): JsonResponse
     {
-        abort_unless($device->user_id === $request->user()->id, 403);
+        $user = $request->user();
+
+        abort_unless($device->user_id === $user->id || $device->isSharedWith($user), 403);
 
         return response()->json([
             'status' => $device->status,

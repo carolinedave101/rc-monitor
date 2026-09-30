@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -113,6 +114,34 @@ class Device extends Model
     public function simulationProfile(): HasOne
     {
         return $this->hasOne(SimulationProfile::class);
+    }
+
+    public function shares(): HasMany
+    {
+        return $this->hasMany(DeviceShare::class);
+    }
+
+    public function consents(): HasMany
+    {
+        return $this->hasMany(Consent::class);
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return $query->where(function (Builder $query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->orWhereHas('shares', function (Builder $query) use ($user) {
+                    $query->where('viewer_id', $user->id)->where('status', 'accepted');
+                });
+        });
+    }
+
+    public function isSharedWith(User $user): bool
+    {
+        return $this->shares()
+            ->where('viewer_id', $user->id)
+            ->where('status', 'accepted')
+            ->exists();
     }
 
     public static function generateToken(): string

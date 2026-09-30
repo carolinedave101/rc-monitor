@@ -21,32 +21,38 @@
             </div>
         </div>
     </div>
-    <div class="d-flex gap-2">
-        @if ($device->status === 'active')
-            <form method="POST" action="{{ route('devices.status', $device) }}">
+    <div class="d-flex gap-2 align-items-center">
+        @if ($isOwner)
+            @if ($device->status === 'active')
+                <form method="POST" action="{{ route('devices.status', $device) }}">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="status" value="suspended">
+                    <button class="btn btn-outline-danger btn-sm"><i class="bi bi-pause-circle"></i> Suspend</button>
+                </form>
+            @elseif ($device->status === 'suspended')
+                <form method="POST" action="{{ route('devices.status', $device) }}">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="status" value="active">
+                    <button class="btn btn-outline-success btn-sm"><i class="bi bi-play-circle"></i> Activate</button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('devices.consent', $device) }}">
+                    @csrf
+                    <button class="btn btn-success btn-sm"><i class="bi bi-check2-circle"></i> Record consent & activate</button>
+                </form>
+            @endif
+            <form method="POST" action="{{ route('devices.destroy', $device) }}" onsubmit="return confirm('Remove this device and all of its data? This cannot be undone.')">
                 @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="suspended">
-                <button class="btn btn-outline-danger btn-sm"><i class="bi bi-pause-circle"></i> Suspend</button>
-            </form>
-        @elseif ($device->status === 'suspended')
-            <form method="POST" action="{{ route('devices.status', $device) }}">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="active">
-                <button class="btn btn-outline-success btn-sm"><i class="bi bi-play-circle"></i> Activate</button>
+                @method('DELETE')
+                <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Remove</button>
             </form>
         @else
-            <form method="POST" action="{{ route('devices.consent', $device) }}">
-                @csrf
-                <button class="btn btn-success btn-sm"><i class="bi bi-check2-circle"></i> Record consent & activate</button>
-            </form>
+            <span class="badge bg-info status-badge py-2 px-3">
+                <i class="bi bi-people me-1"></i>Shared with you by {{ $device->user?->name ?? 'the owner' }}
+            </span>
         @endif
-        <form method="POST" action="{{ route('devices.destroy', $device) }}" onsubmit="return confirm('Remove this device and all of its data? This cannot be undone.')">
-            @csrf
-            @method('DELETE')
-            <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Remove</button>
-        </form>
     </div>
 </div>
 
@@ -100,23 +106,51 @@
 @if ($tab === 'overview')
     <div class="row g-3">
         <div class="col-lg-7">
-            <div class="card">
-                <div class="card-header bg-white"><i class="bi bi-gear me-1"></i> Setup</div>
-                <div class="card-body">
-                    @if ($device->status === 'active' && $device->consent_recorded)
-                        <div class="alert alert-success border-0 rounded-4 py-2 mb-3"><i class="bi bi-check2-circle me-1"></i> Delegated consent was recorded {{ $device->consented_at?->diffForHumans() }} and the device is active.</div>
-                    @endif
+            @if ($isOwner)
+                <div class="card">
+                    <div class="card-header bg-white"><i class="bi bi-gear me-1"></i> Setup</div>
+                    <div class="card-body">
+                        @if ($device->status === 'active' && $device->consent_recorded)
+                            <div class="alert alert-success border-0 rounded-4 py-2 mb-3"><i class="bi bi-check2-circle me-1"></i> Delegated consent was recorded {{ $device->consented_at?->diffForHumans() }} and the device is active.</div>
+                        @endif
 
-                    <p>Install the ROYALTRICO agent on the device and configure it with this enrollment token:</p>
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control font-monospace" id="agent-token" value="{{ $device->agent_token }}" readonly>
-                        <button class="btn btn-outline-secondary" type="button" onclick="copyToken()"><i class="bi bi-clipboard"></i></button>
+                        <p>Install the ROYALTRICO agent on the device and configure it with this enrollment token:</p>
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control font-monospace" id="agent-token" value="{{ $device->agent_token }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyToken()"><i class="bi bi-clipboard"></i></button>
+                        </div>
+                        <p class="text-muted small mb-0">Send it to the agent:
+                            <code>Authorization: Bearer {{ $device->agent_token }}</code> to
+                            <code>POST /api/agent/heartbeat</code> and <code>POST /api/agent/ingest</code>.</p>
                     </div>
-                    <p class="text-muted small mb-0">Send it to the agent:
-                        <code>Authorization: Bearer {{ $device->agent_token }}</code> to
-                        <code>POST /api/agent/heartbeat</code> and <code>POST /api/agent/ingest</code>.</p>
                 </div>
-            </div>
+
+                <div class="card mt-3">
+                    <div class="card-header bg-white"><i class="bi bi-people me-1"></i> Share this device</div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('shares.store', $device) }}" class="d-flex gap-2 mb-3">
+                            @csrf
+                            <input type="email" name="email" class="form-control" placeholder="partner@example.com" required maxlength="255">
+                            <button class="btn btn-primary px-3">Invite</button>
+                        </form>
+                        @forelse ($shares as $share)
+                            <div class="d-flex justify-content-between align-items-center small border-top py-2">
+                                <span>{{ $share->viewer?->name ?? $share->email }}</span>
+                                <span class="badge bg-{{ $share->status === 'accepted' ? 'success' : 'secondary' }} status-badge">{{ ucfirst($share->status) }}</span>
+                            </div>
+                        @empty
+                            <p class="small text-muted mb-2">No one has access yet. Sharing requires the other person to accept.</p>
+                        @endforelse
+                        <a href="{{ route('shares.index') }}" class="small">Manage all sharing</a>
+                    </div>
+                </div>
+            @else
+                <div class="alert alert-info border-0 rounded-4">
+                    <i class="bi bi-info-circle me-1"></i> You have view access shared by
+                    <strong>{{ $device->user?->name ?? 'the owner' }}</strong>.
+                    Only the owner can manage this device, and either side can revoke sharing at any time.
+                </div>
+            @endif
 
             <div class="card mt-3">
                 <div class="card-header bg-white"><i class="bi bi-info-circle me-1"></i> Details</div>

@@ -13,6 +13,7 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\JourneyController;
 use App\Http\Controllers\LiveController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ShareController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => view('home'))->name('home');
@@ -34,6 +35,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+
+    Route::get('/shares', [ShareController::class, 'index'])->name('shares.index');
+    Route::post('/devices/{device}/shares', [ShareController::class, 'store'])->name('shares.store');
+    Route::post('/shares/{share}/accept', [ShareController::class, 'accept'])->name('shares.accept');
+    Route::post('/shares/{share}/revoke', [ShareController::class, 'revoke'])->name('shares.revoke');
 
     Route::get('/devices', [DeviceController::class, 'index'])->name('devices.index');
     Route::get('/devices/create', [DeviceController::class, 'create'])->name('devices.create');
