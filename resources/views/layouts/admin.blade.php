@@ -102,6 +102,9 @@
             <a href="{{ route('admin.payment-methods.index') }}" class="{{ request()->routeIs('admin.payment-methods.*') ? 'active' : '' }}">
                 <i class="bi bi-credit-card"></i> Payment methods
             </a>
+            <a href="{{ route('admin.system.index') }}" class="{{ request()->routeIs('admin.system.*') ? 'active' : '' }}">
+                <i class="bi bi-hdd-stack"></i> System
+            </a>
         </nav>
         <div class="sidebar-footer">
             <div class="mb-2"><i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}</div>

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\JourneyController as AdminJourneyController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PaymentMethodController as AdminPaymentMethodController;
 use App\Http\Controllers\Admin\SimulationController as AdminSimulationController;
+use App\Http\Controllers\Admin\SystemController as AdminSystemController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
@@ -124,4 +125,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/payment-methods', [AdminPaymentMethodController::class, 'index'])->name('payment-methods.index');
     Route::post('/payment-methods', [AdminPaymentMethodController::class, 'store'])->name('payment-methods.store');
     Route::patch('/payment-methods/{paymentMethod}', [AdminPaymentMethodController::class, 'update'])->name('payment-methods.update');
+
+    Route::get('/system', [AdminSystemController::class, 'index'])->name('system.index');
+    Route::post('/system/backup', [AdminSystemController::class, 'backup'])->name('system.backup');
+    Route::get('/system/backup/{filename}', [AdminSystemController::class, 'download'])->name('system.backup.download');
 });
