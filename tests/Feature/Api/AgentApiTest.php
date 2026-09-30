@@ -242,6 +242,39 @@ class AgentApiTest extends TestCase
         $this->assertDatabaseCount('device_diagnostics', 0);
     }
 
+    public function test_agent_api_is_rate_limited()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create(['status' => 'active']);
+
+        foreach (range(1, 120) as $attempt) {
+            $this->withToken($device->agent_token)
+                ->postJson('/api/agent/heartbeat')
+                ->assertOk();
+        }
+
+        $this->withToken($device->agent_token)
+            ->postJson('/api/agent/heartbeat')
+            ->assertStatus(429);
+    }
+
+    public function test_ingest_rejects_oversized_payloads()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create(['status' => 'active']);
+
+        $calls = array_fill(0, 201, [
+            'direction' => 'incoming',
+            'started_at' => now()->subHour()->toDateTimeString(),
+        ]);
+
+        $this->withToken($device->agent_token)
+            ->postJson('/api/agent/ingest', ['calls' => $calls])
+            ->assertJsonValidationErrors('calls');
+
+        $this->assertDatabaseCount('device_calls', 0);
+    }
+
     public function test_ingest_without_known_keyword_does_not_create_alert()
     {
         $user = User::factory()->create();
