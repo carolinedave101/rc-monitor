@@ -4,10 +4,12 @@ namespace Database\Seeders;
 
 use App\Models\Alert;
 use App\Models\AlertRule;
+use App\Models\Consent;
 use App\Models\Device;
 use App\Models\DeviceCall;
 use App\Models\DeviceLocation;
 use App\Models\DeviceMessage;
+use App\Models\DeviceShare;
 use App\Models\User;
 use App\Services\SimulationEngine;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -101,5 +103,38 @@ class DatabaseSeeder extends Seeder
                 'completed_at' => $status === 'completed' ? now()->subDays(6) : null,
             ]);
         }
+
+        $partner = User::factory()->create([
+            'name' => 'Partner Demo',
+            'email' => 'partner@example.com',
+        ]);
+
+        $share = DeviceShare::factory()->for($active)->accepted()->create([
+            'owner_id' => $user->id,
+            'viewer_id' => $partner->id,
+            'email' => $partner->email,
+            'invited_by' => $user->id,
+        ]);
+
+        Consent::create([
+            'user_id' => $partner->id,
+            'device_id' => $active->id,
+            'device_share_id' => $share->id,
+            'type' => 'sharing',
+            'method' => 'in_app',
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'seeder',
+            'consented_at' => now()->subDays(3),
+        ]);
+
+        $active->commands()->create([
+            'requested_by' => $user->id,
+            'type' => 'locate',
+            'status' => 'acknowledged',
+            'issued_at' => now()->subHours(2),
+            'sent_at' => now()->subHours(2)->addMinutes(3),
+            'acknowledged_at' => now()->subHours(2)->addMinutes(4),
+            'result' => 'Location refreshed',
+        ]);
     }
 }

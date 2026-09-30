@@ -45,7 +45,20 @@ npm run dev            # optional: Vite dev server with hot reload
 
 `composer dev` runs the web server, queue listener, log tailer and Vite together.
 
-Seeded demo account: `test@example.com` / `password`.
+Seeded demo accounts:
+
+- `test@example.com` / `password` — owner account (also an admin)
+- `partner@example.com` / `password` — partner with accepted access to Ava's Phone
+
+## Customer features
+
+- Live dashboard and device status polling every 15 seconds
+- Notification bell with database notifications (alerts, plan changes, sharing, remote commands)
+- Consent-based device sharing: invite by email, the other person accepts (recording consent)
+  and either side can revoke at any time; shared devices are read-only for the viewer
+- QR code and enrollment link for setting up the agent on a device (`/enroll/{token}`)
+- Remote commands (lock / ring / locate) delivered to the agent on its next heartbeat, with
+  acknowledgement feedback and history
 
 ## Agent API
 
