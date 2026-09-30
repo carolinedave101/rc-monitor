@@ -183,6 +183,13 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('alerts.index') }}">Alerts</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('alerts.rules') }}">Alert Rules</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('journey.index') }}">My Plan</a></li>
+                @php $unreadNotificationCount = auth()->user()->unreadNotifications()->count(); @endphp
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{{ route('notifications.index') }}" title="Notifications">
+                        <i class="bi bi-bell"></i>
+                        <span id="nav-unread-badge" class="badge rounded-pill bg-danger position-absolute {{ $unreadNotificationCount ? '' : 'd-none' }}" style="top:.1rem; left:1.15rem; font-size:.6rem;">{{ $unreadNotificationCount }}</span>
+                    </a>
+                </li>
             </ul>
             <form method="POST" action="{{ route('logout') }}" class="d-inline d-flex align-items-center gap-2">
                 @csrf

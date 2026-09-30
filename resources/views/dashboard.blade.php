@@ -210,6 +210,12 @@
                 }
             });
 
+            const badge = document.getElementById('nav-unread-badge');
+            if (badge) {
+                badge.textContent = data.stats.notifications;
+                badge.classList.toggle('d-none', data.stats.notifications === 0);
+            }
+
             document.getElementById('live-updated').textContent = '· updated ' + timeFormatter.format(new Date());
         } catch (error) {
             // Keep the last known state when polling fails.

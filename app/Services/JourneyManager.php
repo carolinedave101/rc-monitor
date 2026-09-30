@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AuditLog;
 use App\Models\ServiceStep;
 use App\Models\User;
+use App\Notifications\JourneyStatusChanged;
 
 class JourneyManager
 {
@@ -77,6 +78,8 @@ class JourneyManager
             'reason' => $reason,
             'services_suspended' => $suspendServices,
         ]);
+
+        $step->user->notify(new JourneyStatusChanged($step, 'paused'));
     }
 
     public function resume(ServiceStep $step): void
@@ -97,6 +100,8 @@ class JourneyManager
         }
 
         AuditLog::record('journey.step.resumed', $step, ['owner_id' => $ownerId]);
+
+        $step->user->notify(new JourneyStatusChanged($step, 'resumed'));
     }
 
     public function remove(ServiceStep $step): void

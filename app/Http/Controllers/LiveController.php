@@ -27,6 +27,7 @@ class LiveController extends Controller
                 'active' => $devices->where('status', 'active')->count(),
                 'online' => $devices->filter(fn ($device) => $device->isOnline())->count(),
                 'unread' => $unread,
+                'notifications' => $user->unreadNotifications()->count(),
             ],
             'devices' => $devices->map(fn (Device $device) => [
                 'id' => $device->id,

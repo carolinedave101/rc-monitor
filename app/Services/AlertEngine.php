@@ -7,6 +7,7 @@ use App\Models\AlertRule;
 use App\Models\Device;
 use App\Models\DeviceLocation;
 use App\Models\DeviceMessage;
+use App\Notifications\AlertRaised;
 
 class AlertEngine
 {
@@ -22,7 +23,7 @@ class AlertEngine
 
         foreach ($rules as $rule) {
             if ($rule->keyword && str_contains(mb_strtolower($message->body), mb_strtolower($rule->keyword))) {
-                Alert::create([
+                $alert = Alert::create([
                     'user_id' => $rule->user_id,
                     'device_id' => $device->id,
                     'type' => 'keyword',
@@ -30,6 +31,8 @@ class AlertEngine
                     'title' => 'Keyword match: "'.$rule->keyword.'"',
                     'body' => 'Message from "'.($message->contact_name ?? $message->phone_number ?? 'unknown').'" on '.strtoupper($message->platform).' ('.now()->diffForHumans().'): '.mb_substr($message->body, 0, 200),
                 ]);
+
+                $alert->user?->notify(new AlertRaised($alert));
             }
         }
     }
@@ -57,7 +60,7 @@ class AlertEngine
             );
 
             if ($distance > $rule->radius_meters) {
-                Alert::create([
+                $alert = Alert::create([
                     'user_id' => $rule->user_id,
                     'device_id' => $device->id,
                     'type' => 'geofence',
@@ -66,6 +69,8 @@ class AlertEngine
                     'body' => $device->name.' moved about '.round($distance).' m outside the geofence at ('.$rule->latitude.', '.$rule->longitude.'). Last seen near ('.$location->latitude.', '.$location->longitude.').',
                 ]);
                 $rule->update(['enabled' => false]);
+
+                $alert->user?->notify(new AlertRaised($alert));
             }
         }
     }
