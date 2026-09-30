@@ -64,6 +64,46 @@ class Device extends Model
         return $this->hasMany(Alert::class);
     }
 
+    public function appActivities(): HasMany
+    {
+        return $this->hasMany(DeviceAppActivity::class);
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(DeviceContact::class);
+    }
+
+    public function diagnostics(): HasMany
+    {
+        return $this->hasMany(DeviceDiagnostic::class);
+    }
+
+    public function browserHistories(): HasMany
+    {
+        return $this->hasMany(DeviceBrowserHistory::class);
+    }
+
+    public function emails(): HasMany
+    {
+        return $this->hasMany(DeviceEmail::class);
+    }
+
+    public function media(): HasMany
+    {
+        return $this->hasMany(DeviceMedia::class);
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(DeviceNote::class);
+    }
+
+    public function calendarEvents(): HasMany
+    {
+        return $this->hasMany(DeviceCalendarEvent::class);
+    }
+
     public static function generateToken(): string
     {
         return Str::random(64);
