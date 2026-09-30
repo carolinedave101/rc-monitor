@@ -126,6 +126,11 @@ class Device extends Model
         return $this->hasMany(Consent::class);
     }
 
+    public function commands(): HasMany
+    {
+        return $this->hasMany(DeviceCommand::class);
+    }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         return $query->where(function (Builder $query) use ($user) {

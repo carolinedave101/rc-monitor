@@ -153,6 +153,38 @@
                         <a href="{{ route('shares.index') }}" class="small">Manage all sharing</a>
                     </div>
                 </div>
+
+                <div class="card mt-3">
+                    <div class="card-header bg-white"><i class="bi bi-broadcast me-1"></i> Remote commands</div>
+                    <div class="card-body">
+                        <div class="d-flex gap-2 flex-wrap mb-3">
+                            @foreach (\App\Models\DeviceCommand::TYPES as $type)
+                                <form method="POST" action="{{ route('device-commands.store', $device) }}">
+                                    @csrf
+                                    <input type="hidden" name="type" value="{{ $type }}">
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="bi {{ $type === 'lock' ? 'bi-lock' : ($type === 'ring' ? 'bi-music-note-beamed' : 'bi-geo-alt') }} me-1"></i>
+                                        {{ \App\Models\DeviceCommand::LABELS[$type] }}
+                                    </button>
+                                </form>
+                            @endforeach
+                        </div>
+
+                        @forelse ($commands as $command)
+                            <div class="d-flex justify-content-between align-items-center small border-top py-2">
+                                <div>
+                                    <span class="fw-semibold">{{ $command->label() }}</span>
+                                    <span class="text-muted">· {{ $command->created_at->diffForHumans() }}</span>
+                                </div>
+                                <span class="badge bg-{{ $command->statusColor() }} status-badge">
+                                    {{ ucfirst($command->status) }}
+                                </span>
+                            </div>
+                        @empty
+                            <p class="small text-muted mb-0">No commands sent yet. Commands are delivered at the agent's next check-in.</p>
+                        @endforelse
+                    </div>
+                </div>
             @else
                 <div class="alert alert-info border-0 rounded-4">
                     <i class="bi bi-info-circle me-1"></i> You have view access shared by

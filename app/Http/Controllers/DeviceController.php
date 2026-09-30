@@ -89,11 +89,16 @@ class DeviceController extends Controller
             ? $device->shares()->whereIn('status', ['pending', 'accepted'])->with('viewer')->latest()->get()
             : collect();
 
+        $commands = $isOwner
+            ? $device->commands()->latest()->limit(10)->get()
+            : collect();
+
         return view('devices.show', compact(
             'device',
             'tab',
             'isOwner',
             'shares',
+            'commands',
             'calls',
             'messages',
             'locations',

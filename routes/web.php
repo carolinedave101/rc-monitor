@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeviceCommandController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\JourneyController;
@@ -51,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/devices', [DeviceController::class, 'store'])->name('devices.store');
     Route::get('/devices/{device}', [DeviceController::class, 'show'])->name('devices.show');
     Route::get('/devices/{device}/live', [LiveController::class, 'device'])->name('devices.live');
+    Route::post('/devices/{device}/commands', [DeviceCommandController::class, 'store'])->name('device-commands.store');
     Route::patch('/devices/{device}/status', [DeviceController::class, 'updateStatus'])->name('devices.status');
     Route::post('/devices/{device}/consent', [DeviceController::class, 'markConsented'])->name('devices.consent');
     Route::delete('/devices/{device}', [DeviceController::class, 'destroy'])->name('devices.destroy');

@@ -14,6 +14,7 @@ use App\Models\DeviceLocation;
 use App\Models\DeviceMedia;
 use App\Models\DeviceMessage;
 use App\Models\DeviceNote;
+use App\Notifications\CommandCompleted;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 
@@ -122,9 +123,28 @@ class SimulationEngine
 
         $counts = $this->generateBetween($device, $from, $to);
 
+        $this->acknowledgeCommands($device);
+
         $profile->update(['last_tick_at' => $to]);
 
         return $counts;
+    }
+
+    protected function acknowledgeCommands(Device $device): void
+    {
+        $commands = $device->commands()
+            ->whereIn('status', ['pending', 'sent'])
+            ->get();
+
+        foreach ($commands as $command) {
+            $command->update([
+                'status' => 'acknowledged',
+                'result' => 'Acknowledged by simulated agent',
+                'acknowledged_at' => now(),
+            ]);
+
+            $device->user?->notify(new CommandCompleted($command));
+        }
     }
 
     public function backfill(Device $device, int $days = 30): array
