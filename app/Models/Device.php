@@ -104,6 +104,11 @@ class Device extends Model
         return $this->hasMany(DeviceCalendarEvent::class);
     }
 
+    public function featureStates(): HasMany
+    {
+        return $this->hasMany(DeviceFeature::class);
+    }
+
     public static function generateToken(): string
     {
         return Str::random(64);

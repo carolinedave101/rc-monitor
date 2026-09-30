@@ -22,7 +22,7 @@
                 @forelse ($devices as $device)
                     <tr>
                         <td>
-                            <div class="fw-semibold">{{ $device->name }}</div>
+                            <a href="{{ route('admin.devices.show', $device) }}" class="fw-semibold text-decoration-none">{{ $device->name }}</a>
                             <div class="small text-muted">{{ $device->manufacturer }} {{ $device->model }}</div>
                         </td>
                         <td>

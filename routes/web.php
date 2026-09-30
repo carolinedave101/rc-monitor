@@ -59,6 +59,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/steps/{step}', [AdminJourneyController::class, 'destroy'])->name('steps.destroy');
 
     Route::get('/devices', [AdminDeviceController::class, 'index'])->name('devices.index');
+    Route::get('/devices/{device}', [AdminDeviceController::class, 'show'])->name('devices.show');
     Route::patch('/devices/{device}', [AdminDeviceController::class, 'updateStatus'])->name('devices.update-status');
+    Route::patch('/devices/{device}/features/{feature}', [AdminDeviceController::class, 'updateFeature'])->name('devices.features.update');
     Route::post('/devices/{device}/rotate-token', [AdminDeviceController::class, 'rotateToken'])->name('devices.rotate-token');
 });
