@@ -115,6 +115,15 @@
                         @endif
 
                         <p>Install the ROYALTRICO agent on the device and configure it with this enrollment token:</p>
+                        <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+                            <div class="border rounded-3 p-2 bg-white">
+                                {!! \App\Support\QrCode::svg(route('enroll.show', $device->agent_token), 140) !!}
+                            </div>
+                            <div class="small">
+                                <div class="fw-semibold mb-1">Scan to open the enrollment page</div>
+                                <a href="{{ route('enroll.show', $device->agent_token) }}" target="_blank" class="text-break">{{ route('enroll.show', $device->agent_token) }}</a>
+                            </div>
+                        </div>
                         <div class="input-group mb-2">
                             <input type="text" class="form-control font-monospace" id="agent-token" value="{{ $device->agent_token }}" readonly>
                             <button class="btn btn-outline-secondary" type="button" onclick="copyToken()"><i class="bi bi-clipboard"></i></button>

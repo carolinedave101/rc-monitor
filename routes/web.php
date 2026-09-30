@@ -10,6 +10,7 @@ use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\JourneyController;
 use App\Http\Controllers\LiveController;
 use App\Http\Controllers\NotificationController;
@@ -17,6 +18,10 @@ use App\Http\Controllers\ShareController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => view('home'))->name('home');
+
+Route::get('/enroll/{token}', [EnrollmentController::class, 'show'])
+    ->middleware('throttle:30,1')
+    ->name('enroll.show');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
