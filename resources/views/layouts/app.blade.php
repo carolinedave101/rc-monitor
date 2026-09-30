@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'ROYALTRICO') — Consent-Based Device Monitoring</title>
+    <title>@yield('title', 'ROYALTRICO — Consent-Based Device Monitoring')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon-64.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -105,6 +105,17 @@
         /* Badges & dots */
         .badge { border-radius: 999px; font-weight: 600; }
         .status-badge { font-size: .7rem; }
+        .status-dot {
+            display: inline-block;
+            width: .55rem;
+            height: .55rem;
+            border-radius: 50%;
+            background: #94a3b8;
+            vertical-align: middle;
+            box-shadow: 0 0 0 .2rem rgba(100, 116, 139, .12);
+        }
+        .status-dot.online { background: #22c55e; box-shadow: 0 0 0 .2rem rgba(34, 197, 94, .18); }
+        .status-dot.offline { background: #94a3b8; }
 
         /* Tables */
         .table { --bs-table-hover-bg: #f4f8ff; }
