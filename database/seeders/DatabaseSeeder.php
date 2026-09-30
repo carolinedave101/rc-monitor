@@ -10,6 +10,7 @@ use App\Models\DeviceCall;
 use App\Models\DeviceLocation;
 use App\Models\DeviceMessage;
 use App\Models\DeviceShare;
+use App\Models\Plan;
 use App\Models\User;
 use App\Services\SimulationEngine;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -25,11 +26,21 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(FeatureSeeder::class);
+        $this->call(PlanSeeder::class);
 
         $user = User::factory()->admin()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        $standard = Plan::where('code', 'standard')->first();
+
+        if ($standard) {
+            $user->update([
+                'plan_id' => $standard->id,
+                'plan_activated_at' => now()->subDays(10),
+            ]);
+        }
 
         $active = Device::factory()->for($user)->create([
             'name' => "Ava's Phone",

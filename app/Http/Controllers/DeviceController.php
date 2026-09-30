@@ -31,6 +31,14 @@ class DeviceController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        if ($user->devices()->count() >= $user->deviceLimit()) {
+            return back()
+                ->withErrors(['name' => 'Your plan allows up to '.$user->deviceLimit().' devices. Choose a higher plan to enroll more.'])
+                ->withInput();
+        }
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'manufacturer' => 'nullable|string|max:100',

@@ -30,6 +30,7 @@ class SeedingTest extends TestCase
         $this->assertDatabaseCount('consents', 1);
         $this->assertDatabaseCount('device_commands', 1);
         $this->assertDatabaseCount('service_steps', 5);
+        $this->assertDatabaseCount('plans', 2);
         $this->assertSame('active', Device::where('name', "Ava's Phone")->value('status'));
         $this->assertSame('pending', Device::where('name', 'Work Tablet')->value('status'));
         $this->assertSame('suspended', Device::where('name', "Mom's iPhone")->value('status'));

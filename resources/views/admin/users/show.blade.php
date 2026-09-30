@@ -169,6 +169,25 @@
                 <dt class="small text-muted">Joined</dt>
                 <dd class="mb-0">{{ $user->created_at->format('M j, Y g:i A') }}</dd>
             </dl>
+
+            <hr class="my-3">
+
+            <h2 class="h6 text-muted text-uppercase mb-3">Plan</h2>
+            <form method="POST" action="{{ route('admin.users.plan', $user) }}">
+                @csrf
+                <select name="plan_id" class="form-select form-select-sm mb-2">
+                    <option value="">No plan (default limit {{ \App\Models\User::DEFAULT_DEVICE_LIMIT }})</option>
+                    @foreach ($plans as $plan)
+                        <option value="{{ $plan->id }}" @selected($user->plan_id === $plan->id)>
+                            {{ $plan->name }} — {{ $plan->priceLabel() }}{{ $plan->device_limit ? ' · '.$plan->device_limit.' devices' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                <button class="btn btn-sm btn-primary w-100">Save plan</button>
+            </form>
+            @if ($user->plan_activated_at)
+                <div class="small text-muted mt-2">Active since {{ $user->plan_activated_at->format('M j, Y') }}</div>
+            @endif
         </div>
     </div>
 

@@ -184,6 +184,7 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('alerts.rules') }}">Alert Rules</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('journey.index') }}">My Plan</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('shares.index') }}">Sharing</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('billing.index') }}">Billing</a></li>
                 @php $unreadNotificationCount = auth()->user()->unreadNotifications()->count(); @endphp
                 <li class="nav-item">
                     <a class="nav-link position-relative" href="{{ route('notifications.index') }}" title="Notifications">

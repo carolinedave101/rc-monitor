@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SimulationController as AdminSimulationController
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceCommandController;
 use App\Http\Controllers\DeviceController;
@@ -37,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/dashboard/live', [LiveController::class, 'dashboard'])->name('dashboard.live');
     Route::get('/journey', JourneyController::class)->name('journey.index');
+    Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
@@ -72,6 +74,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+    Route::post('/users/{user}/plan', [AdminUserController::class, 'updatePlan'])->name('users.plan');
 
     Route::post('/users/{user}/steps', [AdminJourneyController::class, 'store'])->name('users.steps.store');
     Route::post('/steps/{step}/start', [AdminJourneyController::class, 'start'])->name('steps.start');
