@@ -140,6 +140,14 @@ notes, calendar and diagnostics. Managers appear as tabs on the device page.
 php artisan test
 ```
 
+## Operations
+
+- Scheduled: `simulate:devices` every minute, `backup:database` daily at 02:00. Run
+  `php artisan schedule:work` or a cron entry in production.
+- Backups: `php artisan backup:database --keep=7`, also available in **Admin → System**.
+- Health: `GET /up` and the **Admin → System** page.
+- Deployment guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
 ## Project layout
 
 ```

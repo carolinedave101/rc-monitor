@@ -80,7 +80,7 @@ plus `source` columns on activity tables and an admin role on `users`.
 | **3 — Domains + simulation** ✓ | All activity domains, simulator (scheduled + manual), backfill | A fresh device shows realistic data in every tab within a minute |
 | **4 — Experience** ✓ | Polling live updates, notifications, sharing & bilateral consent (couples/family), QR/link enrollment, remote commands | Partner invite/accept/revoke works; dashboard updates without reload |
 | **5 — Commercial** ✓ | Plans/entitlements, invoices, payment methods, proof upload + verification queue, journey gating, legal pages | Admin sets methods on an invoice at step N → customer pays + uploads proof → admin approves → step N completes and step N+1 unlocks |
-| **6 — Hardening** | Rate limits, token rotation/revocation, backups, scheduler + queue in production, deployment, monitoring | Deployed, restore tested, limits verified |
+| **6 — Hardening** ✓ | Rate limits, token rotation/revocation, backups, scheduler + queue in production, deployment, monitoring | Deployed, restore tested, limits verified |
 
 ## Working agreement
 
