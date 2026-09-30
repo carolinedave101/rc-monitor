@@ -1,7 +1,8 @@
 # Hugging Face Spaces deployment plan
 
-Status: local deployment files are **done and tested**; the Space itself has **not been
-created or pushed** yet. Resume from “Remaining steps” below.
+Status: local deployment files are **done, tested and committed** (`b1efe43`). The
+Hugging Face Space **`Carolinedave101/royal` exists but is private and has no code
+pushed** yet. Resume from “Remaining steps” below.
 
 ## What is already done
 
@@ -18,39 +19,31 @@ created or pushed** yet. Resume from “Remaining steps” below.
 - [x] Verified: `php artisan test` 162/162 passed, `bash -n docker/entrypoint.sh`, Pint
       clean on touched files
 
-The changes are not committed yet.
+The Docker changes were committed in `b1efe43`; they are not pushed to GitHub yet.
 
 ## Remaining steps
 
-1. Generate a key and copy it:
+1. In the Space **`Carolinedave101/royal`** → **Settings → Variables and secrets**, add:
 
-   ```bash
-   php artisan key:generate --show
-   ```
-
-2. Create the Space: https://huggingface.co/new-space — name `rc-monitor`, SDK
-   **Docker**, Blank template, **Public**.
-
-3. In the Space's **Settings → Variables and secrets**, add:
-
-   - Secret `APP_KEY` = the key from step 1
-   - Variable `APP_URL` = `https://<user>-rc-monitor.hf.space`
+   - Secret `APP_KEY` = get one with `php artisan key:generate --show`
+   - Variable `APP_URL` = `https://carolinedave101-royal.hf.space`
    - Variables `APP_ENV=production`, `APP_DEBUG=false`, `SESSION_DRIVER=database`,
      `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, `DB_CONNECTION=sqlite`,
      `MAIL_MAILER=log`
 
-4. Commit and push:
+2. Make the Space public: **Settings → Change visibility → Public** (it is currently
+   private, so the link is not shareable yet).
+
+3. Push the code (the `hf` remote is already configured):
 
    ```bash
-   git add -A && git commit -m "chore: add Docker deployment for Hugging Face Spaces"
-   git remote add hf https://huggingface.co/spaces/<user>/rc-monitor
-   git push hf main    # username + HF write token as the password
+   git push hf main    # username Carolinedave101 + HF write token as the password
    ```
 
-   (If the remote already exists: `git remote set-url hf <url>`.)
+   Optionally sync GitHub too: `git push origin main` (local `main` is 1 commit ahead).
 
-5. Watch the **Build logs** tab on the Space page. Once it finishes, the app is live at
-   `https://<user>-rc-monitor.hf.space`.
+4. Watch the **Build logs** tab on the Space page. Once it finishes, the app is live at
+   `https://carolinedave101-royal.hf.space`.
 
 ## Verify after the build
 
