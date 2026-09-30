@@ -6,7 +6,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
         <h1 class="page-head h3 mb-1">Dashboard</h1>
-        <p class="text-muted small mb-0">Welcome back — here's what's happening across your devices.</p>
+        <p class="text-muted small mb-0">Welcome back — here's what's happening across your devices. <span id="live-updated" class="text-muted"></span></p>
     </div>
     <a href="{{ route('devices.create') }}" class="btn btn-primary px-4"><i class="bi bi-plus-lg me-1"></i> Enroll device</a>
 </div>
@@ -16,7 +16,7 @@
         <div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
             <div class="stat-icon icon-primary"><i class="bi bi-phone"></i></div>
             <div>
-                <div class="fw-bold fs-4 lh-1 mb-1">{{ $devices->count() }}</div>
+                <div class="fw-bold fs-4 lh-1 mb-1" id="stat-total">{{ $devices->count() }}</div>
                 <div class="text-muted small">Total devices</div>
             </div>
         </div></div>
@@ -25,7 +25,7 @@
         <div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
             <div class="stat-icon icon-success"><i class="bi bi-shield-check"></i></div>
             <div>
-                <div class="fw-bold fs-4 text-primary lh-1 mb-1">{{ $activeDevices }}</div>
+                <div class="fw-bold fs-4 text-primary lh-1 mb-1" id="stat-active">{{ $activeDevices }}</div>
                 <div class="text-muted small">Active</div>
             </div>
         </div></div>
@@ -34,7 +34,7 @@
         <div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
             <div class="stat-icon icon-info"><i class="bi bi-wifi"></i></div>
             <div>
-                <div class="fw-bold fs-4 text-success lh-1 mb-1">{{ $onlineDevices }}</div>
+                <div class="fw-bold fs-4 text-success lh-1 mb-1" id="stat-online">{{ $onlineDevices }}</div>
                 <div class="text-muted small">Online now</div>
             </div>
         </div></div>
@@ -43,7 +43,7 @@
         <div class="card stat-card"><div class="card-body d-flex align-items-center gap-3">
             <div class="stat-icon icon-danger"><i class="bi bi-bell"></i></div>
             <div>
-                <div class="fw-bold fs-4 {{ $unreadAlerts ? 'text-danger' : '' }} lh-1 mb-1">{{ $unreadAlerts }}</div>
+                <div class="fw-bold fs-4 {{ $unreadAlerts ? 'text-danger' : '' }} lh-1 mb-1" id="stat-unread">{{ $unreadAlerts }}</div>
                 <div class="text-muted small">Unread alerts</div>
             </div>
         </div></div>
@@ -101,7 +101,7 @@
                             </span>
                             <div>
                                 <span class="fw-semibold">{{ $device->name }}</span>
-                                <span class="status-dot {{ $device->isOnline() ? 'online' : 'offline' }} ms-2"></span>
+                                <span class="status-dot {{ $device->isOnline() ? 'online' : 'offline' }} ms-2" data-device-dot="{{ $device->id }}"></span>
                                 <div class="small text-muted">
                                     {{ $device->manufacturer ?? 'Unknown' }} {{ $device->model ?? '' }} · {{ strtoupper($device->os) }}
                                     <span class="badge bg-{{ $device->status === 'active' ? 'success' : ($device->status === 'suspended' ? 'danger' : 'secondary') }} status-badge ms-1">{{ ucfirst($device->status) }}</span>
@@ -181,3 +181,42 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const url = @json(route('dashboard.live'));
+    const timeFormatter = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+
+    async function poll() {
+        try {
+            const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!response.ok) return;
+            const data = await response.json();
+
+            document.getElementById('stat-total').textContent = data.stats.total;
+            document.getElementById('stat-active').textContent = data.stats.active;
+            document.getElementById('stat-online').textContent = data.stats.online;
+
+            const unread = document.getElementById('stat-unread');
+            unread.textContent = data.stats.unread;
+            unread.classList.toggle('text-danger', data.stats.unread > 0);
+
+            data.devices.forEach(function (device) {
+                const dot = document.querySelector('[data-device-dot="' + device.id + '"]');
+                if (dot) {
+                    dot.classList.toggle('online', device.online);
+                    dot.classList.toggle('offline', !device.online);
+                }
+            });
+
+            document.getElementById('live-updated').textContent = '· updated ' + timeFormatter.format(new Date());
+        } catch (error) {
+            // Keep the last known state when polling fails.
+        }
+    }
+
+    setInterval(poll, 15000);
+})();
+</script>
+@endpush

@@ -11,6 +11,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\JourneyController;
+use App\Http\Controllers\LiveController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => view('home'))->name('home');
@@ -26,12 +27,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/dashboard/live', [LiveController::class, 'dashboard'])->name('dashboard.live');
     Route::get('/journey', JourneyController::class)->name('journey.index');
 
     Route::get('/devices', [DeviceController::class, 'index'])->name('devices.index');
     Route::get('/devices/create', [DeviceController::class, 'create'])->name('devices.create');
     Route::post('/devices', [DeviceController::class, 'store'])->name('devices.store');
     Route::get('/devices/{device}', [DeviceController::class, 'show'])->name('devices.show');
+    Route::get('/devices/{device}/live', [LiveController::class, 'device'])->name('devices.live');
     Route::patch('/devices/{device}/status', [DeviceController::class, 'updateStatus'])->name('devices.status');
     Route::post('/devices/{device}/consent', [DeviceController::class, 'markConsented'])->name('devices.consent');
     Route::delete('/devices/{device}', [DeviceController::class, 'destroy'])->name('devices.destroy');

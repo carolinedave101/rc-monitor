@@ -11,7 +11,7 @@
         <div>
             <h1 class="page-head h3 mb-0">
                 {{ $device->name }}
-                <span class="status-dot {{ $device->isOnline() ? 'online' : 'offline' }}"></span>
+                <span class="status-dot {{ $device->isOnline() ? 'online' : 'offline' }}" id="device-status-dot"></span>
             </h1>
             <div class="text-muted small">
                 {{ $device->manufacturer ?? 'Unknown' }} {{ $device->model ?? '' }} · {{ strtoupper($device->os) }}
@@ -135,7 +135,7 @@
                             {{ $device->consent_recorded ? 'Recorded '.$device->consented_at?->diffForHumans() : 'Not yet recorded' }}
                         </dd>
                         <dt class="col-sm-4">Last seen</dt>
-                        <dd class="col-sm-8">{{ $device->last_seen_at?->diffForHumans() ?? 'Never' }}</dd>
+                        <dd class="col-sm-8" id="device-last-seen">{{ $device->last_seen_at?->diffForHumans() ?? 'Never' }}</dd>
                         <dt class="col-sm-4">Enrolled</dt>
                         <dd class="col-sm-8">{{ $device->created_at->diffForHumans() }}</dd>
                     </dl>
@@ -573,5 +573,27 @@ function copyToken() {
     el.select();
     document.execCommand('copy');
 }
+
+(function () {
+    const url = @json(route('devices.live', $device));
+    const dot = document.getElementById('device-status-dot');
+    const lastSeen = document.getElementById('device-last-seen');
+
+    async function poll() {
+        try {
+            const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!response.ok) return;
+            const data = await response.json();
+
+            dot.classList.toggle('online', data.online);
+            dot.classList.toggle('offline', !data.online);
+            lastSeen.textContent = data.last_seen_human;
+        } catch (error) {
+            // Keep the last known state when polling fails.
+        }
+    }
+
+    setInterval(poll, 15000);
+})();
 </script>
 @endpush
