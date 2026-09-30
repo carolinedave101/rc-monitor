@@ -28,6 +28,40 @@ class AgentApiTest extends TestCase
             ->assertUnauthorized();
     }
 
+    public function test_pending_device_activates_on_first_checkin()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create([
+            'status' => 'pending',
+            'consent_recorded' => true,
+            'consented_at' => now()->subDay(),
+        ]);
+
+        $this->withToken($device->agent_token)
+            ->postJson('/api/agent/heartbeat')
+            ->assertOk();
+
+        $device->refresh();
+        $this->assertSame('active', $device->status);
+        $this->assertNotNull($device->last_seen_at);
+    }
+
+    public function test_pending_device_without_consent_is_rejected()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create([
+            'status' => 'pending',
+            'consent_recorded' => false,
+            'consented_at' => null,
+        ]);
+
+        $this->withToken($device->agent_token)
+            ->postJson('/api/agent/heartbeat')
+            ->assertUnauthorized();
+
+        $this->assertSame('pending', $device->fresh()->status);
+    }
+
     public function test_heartbeat_updates_device_metadata()
     {
         $user = User::factory()->create();

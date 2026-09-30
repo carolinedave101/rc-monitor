@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class DeviceController extends Controller
 {
@@ -34,6 +33,7 @@ class DeviceController extends Controller
 
         $device = Auth::user()->devices()->create(array_merge($data, [
             'status' => 'pending',
+            'consented_at' => now(),
             'agent_token' => Device::generateToken(),
         ]));
 

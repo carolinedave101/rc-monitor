@@ -18,14 +18,21 @@ class AgentAuthenticate
         }
 
         $device = Device::where('agent_token', $token)
-            ->where('status', 'active')
+            ->whereIn('status', ['pending', 'active'])
             ->first();
 
-        if (! $device) {
-            return response()->json(['message' => 'Invalid or suspended agent token.'], 401);
+        if (! $device || ! $device->consent_recorded) {
+            return response()->json(['message' => 'Invalid, unconsented or suspended agent token.'], 401);
         }
 
-        $device->forceFill(['last_seen_at' => now()])->save();
+        $attributes = ['last_seen_at' => now()];
+
+        if ($device->status === 'pending') {
+            $attributes['status'] = 'active';
+            $attributes['consented_at'] = $device->consented_at ?? now();
+        }
+
+        $device->forceFill($attributes)->save();
 
         $request->merge(['device' => $device]);
 
