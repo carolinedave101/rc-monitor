@@ -26,6 +26,7 @@ class Device extends Model
         'agent_token',
         'last_seen_at',
         'source',
+        'pause_suspended',
     ];
 
     protected function casts(): array
@@ -34,6 +35,7 @@ class Device extends Model
             'consent_recorded' => 'boolean',
             'consented_at' => 'datetime',
             'last_seen_at' => 'datetime',
+            'pause_suspended' => 'boolean',
         ];
     }
 

@@ -182,6 +182,7 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('devices.index') }}">Devices</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('alerts.index') }}">Alerts</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('alerts.rules') }}">Alert Rules</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('journey.index') }}">My Plan</a></li>
             </ul>
             <form method="POST" action="{{ route('logout') }}" class="d-inline d-flex align-items-center gap-2">
                 @csrf

@@ -21,7 +21,8 @@ class UserController extends Controller
     public function show(User $user): View
     {
         $user->load(['devices' => fn ($query) => $query->latest()])
-            ->load(['alerts' => fn ($query) => $query->latest()->limit(10)]);
+            ->load(['alerts' => fn ($query) => $query->latest()->limit(10)])
+            ->load('serviceSteps');
 
         return view('admin.users.show', compact('user'));
     }

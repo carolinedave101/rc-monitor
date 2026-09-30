@@ -50,6 +50,44 @@
     </div>
 </div>
 
+@if ($steps->isNotEmpty())
+    <div class="card mb-4">
+        <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span><i class="bi bi-signpost-split text-primary me-1"></i> Your service plan</span>
+            <a href="{{ route('journey.index') }}" class="small">View plan</a>
+        </div>
+        <div class="card-body">
+            @if ($pausedStep)
+                <div class="alert alert-warning d-flex gap-2 align-items-start mb-3">
+                    <i class="bi bi-pause-circle-fill"></i>
+                    <div>
+                        <strong>Your plan is paused.</strong>
+                        @if ($pausedStep->paused_reason)
+                            <div class="small mt-1">{{ $pausedStep->paused_reason }}</div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <div class="d-flex justify-content-between small text-muted mb-1">
+                <span>{{ $completedSteps }} of {{ $steps->count() }} steps complete</span>
+                <span>{{ $progress }}%</span>
+            </div>
+            <div class="progress mb-3" style="height: .5rem;">
+                <div class="progress-bar" style="width: {{ $progress }}%"></div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                @foreach ($steps as $step)
+                    <span class="badge text-bg-{{ $step->isPaused() ? 'dark' : $step->statusColor() }} py-2 px-3">
+                        {{ $step->position }}. {{ $step->title }} · {{ $step->isPaused() ? 'Paused' : $step->statusLabel() }}
+                    </span>
+                @endforeach
+            </div>
+        </div>
+    </div>
+@endif
+
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card">

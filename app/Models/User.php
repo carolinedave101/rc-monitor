@@ -46,4 +46,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Alert::class);
     }
+
+    public function serviceSteps(): HasMany
+    {
+        return $this->hasMany(ServiceStep::class)->orderBy('position')->orderBy('id');
+    }
 }

@@ -27,6 +27,22 @@ class DashboardController extends Controller
 
         $features = Feature::query()->public()->ordered()->get();
 
-        return view('dashboard', compact('devices', 'unreadAlerts', 'recentAlerts', 'activeDevices', 'onlineDevices', 'features'));
+        $steps = $user->serviceSteps()->get();
+        $pausedStep = $steps->first(fn ($step) => $step->isPaused());
+        $completedSteps = $steps->where('status', 'completed')->count();
+        $progress = $steps->count() > 0 ? (int) round($completedSteps / $steps->count() * 100) : 0;
+
+        return view('dashboard', compact(
+            'devices',
+            'unreadAlerts',
+            'recentAlerts',
+            'activeDevices',
+            'onlineDevices',
+            'features',
+            'steps',
+            'pausedStep',
+            'completedSteps',
+            'progress',
+        ));
     }
 }

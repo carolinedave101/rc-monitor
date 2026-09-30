@@ -74,5 +74,23 @@ class DatabaseSeeder extends Seeder
 
         Alert::factory()->for($user)->for($active)->count(4)->create();
         Alert::factory()->for($user)->for($active)->read()->create();
+
+        $steps = [
+            ['Account & consent', 'Registration completed and consent recorded.', 'completed'],
+            ['Device enrollment & agent connection', 'Install the agent and connect the first device.', 'in_progress'],
+            ['Baseline activity review', 'Walk through the first days of calls, messages and locations together.', 'pending'],
+            ['Alerts configured & tuned', 'Set keyword and geofence rules that fit the family.', 'pending'],
+            ['Ongoing monitoring & support', 'Regular check-ins and support for the account.', 'pending'],
+        ];
+
+        foreach ($steps as $index => [$title, $description, $status]) {
+            $user->serviceSteps()->create([
+                'title' => $title,
+                'description' => $description,
+                'position' => $index + 1,
+                'status' => $status,
+                'completed_at' => $status === 'completed' ? now()->subDays(6) : null,
+            ]);
+        }
     }
 }
