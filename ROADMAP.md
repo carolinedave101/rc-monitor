@@ -77,7 +77,7 @@ plus `source` columns on activity tables and an admin role on `users`.
 | --- | --- | --- |
 | **1 — Cracks** ✓ | Device activation on first check-in, auth hardening (logout middleware, login throttle), status-dot CSS, page titles, Bootstrap pagination, `AlertFactory`, rich demo seeder, README/ROADMAP, repo cleanup | Tests green, pushed |
 | **2 — Admin foundation** ✓ | `is_admin` + `/admin` gate, feature registry, `source` columns, audit log, journey steps + pause/continue controls, customer status center | Admin can change any device/feature/step status and it is audit-logged and visible to the customer |
-| **3 — Domains + simulation** | All activity domains, simulator (scheduled + manual), backfill | A fresh device shows realistic data in every tab within a minute |
+| **3 — Domains + simulation** ✓ | All activity domains, simulator (scheduled + manual), backfill | A fresh device shows realistic data in every tab within a minute |
 | **4 — Experience** | Polling live updates, notifications, sharing & bilateral consent (couples/family), QR/link enrollment, remote commands | Partner invite/accept/revoke works; dashboard updates without reload |
 | **5 — Commercial** | Plans/entitlements, invoices, payment methods, proof upload + verification queue, journey gating, legal pages | Admin sets methods on an invoice at step N → customer pays + uploads proof → admin approves → step N completes and step N+1 unlocks |
 | **6 — Hardening** | Rate limits, token rotation/revocation, backups, scheduler + queue in production, deployment, monitoring | Deployed, restore tested, limits verified |

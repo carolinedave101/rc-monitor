@@ -74,12 +74,34 @@ Currently the admin can:
 - view platform stats and the audit trail on the dashboard
 - set the status of every advertised feature (`live`, `simulated`, `beta`, `coming_soon`,
   `disabled`) and control whether it is visible to customers
-- manage accounts and devices (device status changes, agent token rotation)
+- manage accounts and devices (device status changes, agent token rotation, per-device
+  feature toggles)
 - manage a customer's service plan: add steps, start, complete & continue, pause with a
   reason (optionally suspending that customer's devices while paused), resume and remove
   steps
+- run the simulation engine: enable/disable per device, set the activity level, tick now,
+  backfill history (1-90 days) and wipe simulated records
 
 Customers see their plan status on the dashboard and at `/journey`.
+
+## Simulation engine
+
+Advertised activity domains that a real agent cannot report yet are filled by the
+simulation engine through the same models and pipelines as live data. Every generated
+record is flagged `source = simulated` and every admin action is audit-logged, so real
+and simulated activity are always distinguishable.
+
+- `php artisan simulate:devices` ticks every device with an enabled simulation profile.
+  It is scheduled every minute in `routes/console.php`.
+- Per-device profiles (enabled + `low`/`normal`/`high` activity) are managed at
+  `/admin/simulation`, together with global pause, backfill and wipe controls.
+- Simulated messages and locations run through the real `AlertEngine`, so keyword and
+  geofence alerts fire from simulated data too.
+
+## Activity domains
+
+Per-device: calls, messages, locations, app activity, browser history, email, media,
+notes, calendar and diagnostics. Managers appear as tabs on the device page.
 
 ## Testing
 

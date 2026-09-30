@@ -9,6 +9,7 @@ use App\Models\DeviceCall;
 use App\Models\DeviceLocation;
 use App\Models\DeviceMessage;
 use App\Models\User;
+use App\Services\SimulationEngine;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -42,6 +43,8 @@ class DatabaseSeeder extends Seeder
             'activity_level' => 'normal',
             'last_tick_at' => now()->subMinutes(15),
         ]);
+
+        app(SimulationEngine::class)->backfill($active, 14);
 
         Device::factory()->for($user)->create([
             'name' => 'Work Tablet',
