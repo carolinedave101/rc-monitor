@@ -89,8 +89,8 @@
     </div>
 </div>
 
-<ul class="nav nav-tabs mb-4" role="tablist">
-    @foreach (['overview' => 'Overview', 'calls' => 'Calls', 'messages' => 'Messages', 'locations' => 'Locations', 'alerts' => 'Alerts'] as $key => $label)
+<ul class="nav nav-tabs mb-4 flex-wrap" role="tablist">
+    @foreach (['overview' => 'Overview', 'calls' => 'Calls', 'messages' => 'Messages', 'locations' => 'Locations', 'alerts' => 'Alerts', 'apps' => 'Apps', 'contacts' => 'Contacts', 'diagnostics' => 'Diagnostics', 'browser' => 'Browser', 'emails' => 'Email', 'media' => 'Media', 'notes' => 'Notes', 'calendar' => 'Calendar'] as $key => $label)
         <li class="nav-item">
             <a class="nav-link {{ $tab === $key ? 'active' : '' }}" href="{{ route('devices.show', array_merge(['device' => $device], $tab === $key ? [] : ['tab' => $key])) }}">{{ $label }}</a>
         </li>
@@ -302,6 +302,265 @@
                     <p class="mt-2 mb-0">No alerts for this device.</p>
                 </div>
             @endforelse
+        </div>
+    </div>
+
+@elseif ($tab === 'apps')
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>App</th>
+                            <th>Category</th>
+                            <th class="text-end">Duration</th>
+                            <th>Launched</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($appActivities as $activity)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ $activity->app_name }}</div>
+                                    <div class="small text-muted">{{ $activity->package ?? '—' }}</div>
+                                </td>
+                                <td><span class="badge bg-light text-dark status-badge">{{ $activity->category ?? '—' }}</span></td>
+                                <td class="text-end">{{ gmdate('H:i:s', $activity->duration_seconds) }}</td>
+                                <td>{{ $activity->launched_at->format('M j, g:i A') }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="text-center text-muted py-5">No app activity recorded yet.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+@elseif ($tab === 'contacts')
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($contacts as $contact)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td class="fw-semibold">{{ $contact->name }}</td>
+                                <td class="font-monospace">{{ $contact->phone_number ?? '—' }}</td>
+                                <td>{{ $contact->email ?? '—' }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="text-center text-muted py-5">No contacts recorded yet.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+@elseif ($tab === 'diagnostics')
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Battery</th>
+                            <th>Charging</th>
+                            <th>Storage</th>
+                            <th>Network</th>
+                            <th>Recorded</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($diagnostics as $diagnostic)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    @php $battery = $diagnostic->battery_percent; @endphp
+                                    <span class="badge bg-{{ $battery === null ? 'secondary' : ($battery < 20 ? 'danger' : ($battery < 50 ? 'warning' : 'success')) }}">
+                                        {{ $battery !== null ? $battery.'%' : '—' }}
+                                    </span>
+                                </td>
+                                <td>{{ $diagnostic->is_charging ? 'Yes' : 'No' }}</td>
+                                <td>
+                                    @if ($diagnostic->storage_used_mb && $diagnostic->storage_total_mb)
+                                        {{ round($diagnostic->storage_used_mb / 1024, 1) }} / {{ round($diagnostic->storage_total_mb / 1024, 1) }} GB
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td><span class="badge bg-light text-dark status-badge">{{ strtoupper($diagnostic->network ?? '—') }}</span></td>
+                                <td>{{ $diagnostic->recorded_at->format('M j, g:i A') }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="6" class="text-center text-muted py-5">No diagnostics recorded yet.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+@elseif ($tab === 'browser')
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Page</th>
+                            <th>URL</th>
+                            <th>Visited</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($browser as $entry)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ $entry->title ?? $entry->domain ?? '—' }}</div>
+                                    <div class="small text-muted">{{ $entry->domain }}</div>
+                                </td>
+                                <td class="small text-break" style="max-width: 22rem;">{{ $entry->url }}</td>
+                                <td>{{ $entry->visited_at->format('M j, g:i A') }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="text-center text-muted py-5">No browser history recorded yet.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+@elseif ($tab === 'emails')
+    <div class="card">
+        <div class="card-body p-0">
+            @forelse ($emails as $email)
+                <div class="border-bottom p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="fw-semibold">{{ $email->subject ?? '(no subject)' }}</span>
+                            <span class="badge bg-{{ $email->direction === 'incoming' ? 'primary' : 'success' }} status-badge ms-1">{{ ucfirst($email->direction) }}</span>
+                        </div>
+                        <div class="text-muted small">{{ $email->sent_at->diffForHumans() }}</div>
+                    </div>
+                    <div class="small text-muted mt-1">{{ $email->address }}</div>
+                    @if ($email->snippet)
+                        <p class="mb-0 mt-1 text-break">{{ $email->snippet }}</p>
+                    @endif
+                </div>
+            @empty
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-envelope" style="font-size: 3rem;"></i>
+                    <p class="mt-2 mb-0">No email activity recorded yet.</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+@elseif ($tab === 'media')
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Type</th>
+                            <th>File</th>
+                            <th class="text-end">Size</th>
+                            <th>Taken</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($media as $item)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    <span class="badge bg-{{ $item->type === 'video' ? 'primary' : 'success' }} status-badge">
+                                        <i class="bi {{ $item->type === 'video' ? 'bi-camera-video' : 'bi-image' }} me-1"></i>{{ ucfirst($item->type) }}
+                                    </span>
+                                </td>
+                                <td class="font-monospace small">{{ $item->filename }}</td>
+                                <td class="text-end">{{ $item->size_mb !== null ? number_format($item->size_mb, 1).' MB' : '—' }}</td>
+                                <td>{{ $item->taken_at->format('M j, g:i A') }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="text-center text-muted py-5">No media recorded yet.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+@elseif ($tab === 'notes')
+    <div class="card">
+        <div class="card-body p-0">
+            @forelse ($notes as $note)
+                <div class="border-bottom p-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold">{{ $note->title }}</span>
+                        <span class="text-muted small">{{ $note->updated_at->diffForHumans() }}</span>
+                    </div>
+                    @if ($note->body)
+                        <p class="mb-0 mt-1 text-break">{{ $note->body }}</p>
+                    @endif
+                </div>
+            @empty
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-journal-text" style="font-size: 3rem;"></i>
+                    <p class="mt-2 mb-0">No notes recorded yet.</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+@elseif ($tab === 'calendar')
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Event</th>
+                            <th>Location</th>
+                            <th>Starts</th>
+                            <th>Ends</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($calendar as $event)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td class="fw-semibold">{{ $event->title }}</td>
+                                <td>{{ $event->location ?? '—' }}</td>
+                                <td>{{ $event->starts_at->format('M j, g:i A') }}</td>
+                                <td>{{ $event->ends_at?->format('M j, g:i A') ?? '—' }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="text-center text-muted py-5">No calendar events recorded yet.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 @endif

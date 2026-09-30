@@ -45,7 +45,17 @@ class DeviceController extends Controller
     {
         $this->authorizeDevice($device);
 
+        $validTabs = [
+            'overview', 'calls', 'messages', 'locations', 'alerts',
+            'apps', 'contacts', 'diagnostics', 'browser', 'emails',
+            'media', 'notes', 'calendar',
+        ];
+
         $tab = $request->query('tab', 'overview');
+
+        if (! in_array($tab, $validTabs, true)) {
+            $tab = 'overview';
+        }
 
         $calls = $device->calls()->latest('started_at')->limit(100)->get();
         $messages = $device->messages()->latest('sent_at')->limit(200)->get();
@@ -53,7 +63,32 @@ class DeviceController extends Controller
         $messagesPlatforms = $messages->groupBy('platform');
         $alerts = $device->alerts()->latest()->limit(20)->get();
 
-        return view('devices.show', compact('device', 'tab', 'calls', 'messages', 'locations', 'messagesPlatforms', 'alerts'));
+        $appActivities = $device->appActivities()->latest('launched_at')->limit(100)->get();
+        $contacts = $device->contacts()->orderBy('name')->limit(200)->get();
+        $diagnostics = $device->diagnostics()->latest('recorded_at')->limit(24)->get();
+        $browser = $device->browserHistories()->latest('visited_at')->limit(100)->get();
+        $emails = $device->emails()->latest('sent_at')->limit(100)->get();
+        $media = $device->media()->latest('taken_at')->limit(100)->get();
+        $notes = $device->notes()->latest('updated_at')->limit(100)->get();
+        $calendar = $device->calendarEvents()->latest('starts_at')->limit(100)->get();
+
+        return view('devices.show', compact(
+            'device',
+            'tab',
+            'calls',
+            'messages',
+            'locations',
+            'messagesPlatforms',
+            'alerts',
+            'appActivities',
+            'contacts',
+            'diagnostics',
+            'browser',
+            'emails',
+            'media',
+            'notes',
+            'calendar',
+        ));
     }
 
     public function destroy(Device $device)

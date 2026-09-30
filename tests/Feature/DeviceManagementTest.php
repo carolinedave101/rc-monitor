@@ -129,11 +129,27 @@ class DeviceManagementTest extends TestCase
         $user = User::factory()->create();
         $device = Device::factory()->for($user)->create();
 
-        foreach (['overview', 'calls', 'messages', 'locations', 'alerts'] as $tab) {
+        $tabs = [
+            'overview', 'calls', 'messages', 'locations', 'alerts', 'apps',
+            'contacts', 'diagnostics', 'browser', 'emails', 'media', 'notes', 'calendar',
+        ];
+
+        foreach ($tabs as $tab) {
             $this->actingAs($user)
                 ->get("/devices/{$device->id}?tab={$tab}")
                 ->assertOk()
                 ->assertSee($device->name);
         }
+    }
+
+    public function test_unknown_tab_falls_back_to_overview()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create();
+
+        $this->actingAs($user)
+            ->get("/devices/{$device->id}?tab=bogus")
+            ->assertOk()
+            ->assertSee('Setup');
     }
 }

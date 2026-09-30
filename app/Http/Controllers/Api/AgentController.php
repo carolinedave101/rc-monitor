@@ -3,9 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DeviceAppActivity;
+use App\Models\DeviceBrowserHistory;
+use App\Models\DeviceCalendarEvent;
 use App\Models\DeviceCall;
+use App\Models\DeviceContact;
+use App\Models\DeviceDiagnostic;
+use App\Models\DeviceEmail;
 use App\Models\DeviceLocation;
+use App\Models\DeviceMedia;
 use App\Models\DeviceMessage;
+use App\Models\DeviceNote;
 use App\Services\AlertEngine;
 use Illuminate\Http\Request;
 
@@ -56,10 +64,54 @@ class AgentController extends Controller
             'locations.*.accuracy_meters' => 'nullable|numeric|min:0',
             'locations.*.label' => 'nullable|string|max:255',
             'locations.*.recorded_at' => 'required|date',
+            'apps' => 'sometimes|array',
+            'apps.*.app_name' => 'required|string|max:255',
+            'apps.*.package' => 'nullable|string|max:255',
+            'apps.*.category' => 'nullable|string|max:100',
+            'apps.*.duration_seconds' => 'nullable|integer|min:0',
+            'apps.*.launched_at' => 'required|date',
+            'contacts' => 'sometimes|array',
+            'contacts.*.name' => 'required|string|max:255',
+            'contacts.*.phone_number' => 'nullable|string|max:30',
+            'contacts.*.email' => 'nullable|email|max:255',
+            'browser' => 'sometimes|array',
+            'browser.*.url' => 'required|string|max:2048',
+            'browser.*.domain' => 'nullable|string|max:255',
+            'browser.*.title' => 'nullable|string|max:255',
+            'browser.*.visited_at' => 'required|date',
+            'emails' => 'sometimes|array',
+            'emails.*.direction' => 'required|in:incoming,outgoing',
+            'emails.*.address' => 'required|string|max:255',
+            'emails.*.subject' => 'nullable|string|max:255',
+            'emails.*.snippet' => 'nullable|string|max:2000',
+            'emails.*.sent_at' => 'required|date',
+            'media' => 'sometimes|array',
+            'media.*.type' => 'required|in:photo,video',
+            'media.*.filename' => 'required|string|max:255',
+            'media.*.size_mb' => 'nullable|numeric|min:0',
+            'media.*.taken_at' => 'required|date',
+            'notes' => 'sometimes|array',
+            'notes.*.title' => 'required|string|max:255',
+            'notes.*.body' => 'nullable|string',
+            'calendar' => 'sometimes|array',
+            'calendar.*.title' => 'required|string|max:255',
+            'calendar.*.location' => 'nullable|string|max:255',
+            'calendar.*.starts_at' => 'required|date',
+            'calendar.*.ends_at' => 'nullable|date',
+            'diagnostics' => 'sometimes|array',
+            'diagnostics.battery_percent' => 'nullable|integer|between:0,100',
+            'diagnostics.is_charging' => 'nullable|boolean',
+            'diagnostics.storage_used_mb' => 'nullable|integer|min:0',
+            'diagnostics.storage_total_mb' => 'nullable|integer|min:0',
+            'diagnostics.network' => 'nullable|string|max:30',
+            'diagnostics.recorded_at' => 'required_with:diagnostics|date',
         ]);
 
         $device = $request->device;
-        $counts = ['calls' => 0, 'messages' => 0, 'locations' => 0];
+        $counts = array_fill_keys([
+            'calls', 'messages', 'locations', 'apps', 'contacts', 'browser',
+            'emails', 'media', 'notes', 'calendar', 'diagnostics',
+        ], 0);
 
         foreach ($validated['calls'] ?? [] as $call) {
             DeviceCall::create(array_merge($call, [
@@ -85,6 +137,77 @@ class AgentController extends Controller
             ]));
             $this->alertEngine->evaluateLocation($device, $location);
             $counts['locations']++;
+        }
+
+        foreach ($validated['apps'] ?? [] as $app) {
+            DeviceAppActivity::create(array_merge($app, [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
+            $counts['apps']++;
+        }
+
+        foreach ($validated['contacts'] ?? [] as $contact) {
+            DeviceContact::firstOrCreate(
+                [
+                    'device_id' => $device->id,
+                    'name' => $contact['name'],
+                    'phone_number' => $contact['phone_number'] ?? null,
+                ],
+                [
+                    'email' => $contact['email'] ?? null,
+                    'source' => 'agent',
+                ],
+            );
+            $counts['contacts']++;
+        }
+
+        foreach ($validated['browser'] ?? [] as $entry) {
+            DeviceBrowserHistory::create(array_merge($entry, [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
+            $counts['browser']++;
+        }
+
+        foreach ($validated['emails'] ?? [] as $email) {
+            DeviceEmail::create(array_merge($email, [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
+            $counts['emails']++;
+        }
+
+        foreach ($validated['media'] ?? [] as $medium) {
+            DeviceMedia::create(array_merge($medium, [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
+            $counts['media']++;
+        }
+
+        foreach ($validated['notes'] ?? [] as $note) {
+            DeviceNote::create(array_merge($note, [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
+            $counts['notes']++;
+        }
+
+        foreach ($validated['calendar'] ?? [] as $event) {
+            DeviceCalendarEvent::create(array_merge($event, [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
+            $counts['calendar']++;
+        }
+
+        if (! empty($validated['diagnostics'])) {
+            DeviceDiagnostic::create(array_merge($validated['diagnostics'], [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
+            $counts['diagnostics'] = 1;
         }
 
         return response()->json([

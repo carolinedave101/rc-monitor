@@ -148,6 +148,100 @@ class AgentApiTest extends TestCase
         $this->assertDatabaseCount('device_locations', 0);
     }
 
+    public function test_ingest_stores_extended_domains()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create(['status' => 'active']);
+
+        $response = $this->withToken($device->agent_token)
+            ->postJson('/api/agent/ingest', [
+                'apps' => [
+                    ['app_name' => 'WhatsApp', 'package' => 'com.whatsapp', 'category' => 'social', 'duration_seconds' => 300, 'launched_at' => now()->subMinutes(20)],
+                ],
+                'contacts' => [
+                    ['name' => 'Mom', 'phone_number' => '+15550000001', 'email' => 'mom@example.com'],
+                ],
+                'browser' => [
+                    ['url' => 'https://www.wikipedia.org', 'domain' => 'wikipedia.org', 'title' => 'Wikipedia', 'visited_at' => now()->subMinutes(15)],
+                ],
+                'emails' => [
+                    ['direction' => 'incoming', 'address' => 'school@example.com', 'subject' => 'Newsletter', 'snippet' => 'This week at school', 'sent_at' => now()->subHours(2)],
+                ],
+                'media' => [
+                    ['type' => 'photo', 'filename' => 'IMG_0001.jpg', 'size_mb' => 3.4, 'taken_at' => now()->subHours(3)],
+                ],
+                'notes' => [
+                    ['title' => 'Homework', 'body' => 'Math page 12'],
+                ],
+                'calendar' => [
+                    ['title' => 'School pickup', 'location' => 'School', 'starts_at' => now()->addDay(), 'ends_at' => now()->addDay()->addHour()],
+                ],
+                'diagnostics' => [
+                    'battery_percent' => 72,
+                    'is_charging' => false,
+                    'storage_used_mb' => 64000,
+                    'storage_total_mb' => 128000,
+                    'network' => 'wifi',
+                    'recorded_at' => now()->subMinutes(5),
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('ingested.apps', 1)
+            ->assertJsonPath('ingested.contacts', 1)
+            ->assertJsonPath('ingested.browser', 1)
+            ->assertJsonPath('ingested.emails', 1)
+            ->assertJsonPath('ingested.media', 1)
+            ->assertJsonPath('ingested.notes', 1)
+            ->assertJsonPath('ingested.calendar', 1)
+            ->assertJsonPath('ingested.diagnostics', 1);
+
+        $this->assertDatabaseCount('device_app_activities', 1);
+        $this->assertDatabaseCount('device_contacts', 1);
+        $this->assertDatabaseCount('device_browser_histories', 1);
+        $this->assertDatabaseCount('device_emails', 1);
+        $this->assertDatabaseCount('device_media', 1);
+        $this->assertDatabaseCount('device_notes', 1);
+        $this->assertDatabaseCount('device_calendar_events', 1);
+        $this->assertDatabaseCount('device_diagnostics', 1);
+
+        $this->assertDatabaseHas('device_app_activities', ['source' => 'agent']);
+        $this->assertDatabaseHas('device_contacts', ['source' => 'agent']);
+        $this->assertDatabaseHas('device_diagnostics', ['source' => 'agent', 'battery_percent' => 72]);
+    }
+
+    public function test_ingest_does_not_duplicate_contacts()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create(['status' => 'active']);
+
+        $payload = [
+            'contacts' => [
+                ['name' => 'Mom', 'phone_number' => '+15550000001'],
+            ],
+        ];
+
+        $this->withToken($device->agent_token)->postJson('/api/agent/ingest', $payload)->assertOk();
+        $this->withToken($device->agent_token)->postJson('/api/agent/ingest', $payload)->assertOk();
+
+        $this->assertDatabaseCount('device_contacts', 1);
+    }
+
+    public function test_ingest_validates_extended_domains()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create(['status' => 'active']);
+
+        $this->withToken($device->agent_token)
+            ->postJson('/api/agent/ingest', [
+                'apps' => [['app_name' => 'Chrome']],
+                'diagnostics' => ['battery_percent' => 150, 'recorded_at' => now()],
+            ])
+            ->assertJsonValidationErrors(['apps.0.launched_at', 'diagnostics.battery_percent']);
+
+        $this->assertDatabaseCount('device_app_activities', 0);
+        $this->assertDatabaseCount('device_diagnostics', 0);
+    }
+
     public function test_ingest_without_known_keyword_does_not_create_alert()
     {
         $user = User::factory()->create();
