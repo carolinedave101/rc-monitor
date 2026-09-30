@@ -17,6 +17,7 @@ class DeviceCall extends Model
         'phone_number',
         'duration_seconds',
         'started_at',
+        'source',
     ];
 
     protected function casts(): array

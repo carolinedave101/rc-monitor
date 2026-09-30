@@ -25,6 +25,7 @@ class Device extends Model
         'consented_at',
         'agent_token',
         'last_seen_at',
+        'source',
     ];
 
     protected function casts(): array

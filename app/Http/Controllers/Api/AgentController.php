@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Device;
 use App\Models\DeviceCall;
 use App\Models\DeviceLocation;
 use App\Models\DeviceMessage;
@@ -12,9 +11,7 @@ use Illuminate\Http\Request;
 
 class AgentController extends Controller
 {
-    public function __construct(private readonly AlertEngine $alertEngine)
-    {
-    }
+    public function __construct(private readonly AlertEngine $alertEngine) {}
 
     public function heartbeat(Request $request)
     {
@@ -38,7 +35,7 @@ class AgentController extends Controller
 
     public function ingest(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'calls' => 'sometimes|array',
             'calls.*.direction' => 'required|in:incoming,outgoing,missed',
             'calls.*.contact_name' => 'nullable|string|max:255',
@@ -64,19 +61,28 @@ class AgentController extends Controller
         $device = $request->device;
         $counts = ['calls' => 0, 'messages' => 0, 'locations' => 0];
 
-        foreach ($request->input('calls', []) as $call) {
-            DeviceCall::create(array_merge($call, ['device_id' => $device->id]));
+        foreach ($validated['calls'] ?? [] as $call) {
+            DeviceCall::create(array_merge($call, [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
             $counts['calls']++;
         }
 
-        foreach ($request->input('messages', []) as $msg) {
-            $message = DeviceMessage::create(array_merge($msg, ['device_id' => $device->id]));
+        foreach ($validated['messages'] ?? [] as $msg) {
+            $message = DeviceMessage::create(array_merge($msg, [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
             $this->alertEngine->evaluateMessage($device, $message);
             $counts['messages']++;
         }
 
-        foreach ($request->input('locations', []) as $loc) {
-            $location = DeviceLocation::create(array_merge($loc, ['device_id' => $device->id]));
+        foreach ($validated['locations'] ?? [] as $loc) {
+            $location = DeviceLocation::create(array_merge($loc, [
+                'device_id' => $device->id,
+                'source' => 'agent',
+            ]));
             $this->alertEngine->evaluateLocation($device, $location);
             $counts['locations']++;
         }

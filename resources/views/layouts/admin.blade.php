@@ -77,6 +77,9 @@
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
+            <a href="{{ route('admin.features.index') }}" class="{{ request()->routeIs('admin.features.*') ? 'active' : '' }}">
+                <i class="bi bi-grid-3x3-gap"></i> Features
+            </a>
         </nav>
         <div class="sidebar-footer">
             <div class="mb-2"><i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}</div>

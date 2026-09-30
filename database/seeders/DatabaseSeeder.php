@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(FeatureSeeder::class);
+
         $user = User::factory()->admin()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',

@@ -112,4 +112,34 @@
         </div>
     </div>
 </div>
+
+<div class="card mt-4">
+    <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span><i class="bi bi-grid-3x3-gap text-primary me-1"></i> Service status</span>
+        <span class="small text-muted">What's active on your account right now</span>
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+            @forelse ($features as $feature)
+                @php
+                    $badge = match ($feature->status) {
+                        'live' => 'text-bg-success',
+                        'simulated' => 'text-bg-primary',
+                        'beta' => 'text-bg-info',
+                        default => 'text-bg-light border',
+                    };
+                    $label = match ($feature->status) {
+                        'live' => 'Active',
+                        'simulated' => 'Simulated',
+                        'beta' => 'Beta',
+                        default => 'Coming soon',
+                    };
+                @endphp
+                <span class="badge {{ $badge }} py-2 px-3">{{ $feature->name }} · {{ $label }}</span>
+            @empty
+                <span class="text-muted small">No services published yet.</span>
+            @endforelse
+        </div>
+    </div>
+</div>
 @endsection

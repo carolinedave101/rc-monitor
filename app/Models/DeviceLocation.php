@@ -17,6 +17,7 @@ class DeviceLocation extends Model
         'accuracy_meters',
         'label',
         'recorded_at',
+        'source',
     ];
 
     protected function casts(): array

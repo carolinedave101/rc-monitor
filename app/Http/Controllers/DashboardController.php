@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Device;
 use App\Models\Alert;
+use App\Models\Device;
+use App\Models\Feature;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +25,8 @@ class DashboardController extends Controller
         $activeDevices = $devices->where('status', 'active')->count();
         $onlineDevices = $devices->filter(fn ($d) => $d->isOnline())->count();
 
-        return view('dashboard', compact('devices', 'unreadAlerts', 'recentAlerts', 'activeDevices', 'onlineDevices'));
+        $features = Feature::query()->public()->ordered()->get();
+
+        return view('dashboard', compact('devices', 'unreadAlerts', 'recentAlerts', 'activeDevices', 'onlineDevices', 'features'));
     }
 }

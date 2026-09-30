@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\FeatureController as AdminFeatureController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -38,4 +39,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
+
+    Route::get('/features', [AdminFeatureController::class, 'index'])->name('features.index');
+    Route::patch('/features/{feature}', [AdminFeatureController::class, 'update'])->name('features.update');
 });

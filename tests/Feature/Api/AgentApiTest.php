@@ -115,6 +115,23 @@ class AgentApiTest extends TestCase
         $call = DeviceCall::first();
         $this->assertEquals($device->id, $call->device_id);
         $this->assertEquals('Mom', $call->contact_name);
+        $this->assertSame('agent', $call->source);
+    }
+
+    public function test_ingest_cannot_spoof_record_source()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create(['status' => 'active']);
+
+        $this->withToken($device->agent_token)
+            ->postJson('/api/agent/ingest', [
+                'calls' => [
+                    ['direction' => 'incoming', 'started_at' => now()->subHour(), 'source' => 'simulated'],
+                ],
+            ])
+            ->assertOk();
+
+        $this->assertSame('agent', DeviceCall::first()->source);
     }
 
     public function test_ingest_validates_payload()

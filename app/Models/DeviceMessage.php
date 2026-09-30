@@ -19,6 +19,7 @@ class DeviceMessage extends Model
         'body',
         'was_deleted',
         'sent_at',
+        'source',
     ];
 
     protected function casts(): array
