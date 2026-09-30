@@ -53,6 +53,34 @@
             </div>
         </div>
     </div>
+    <div class="col-sm-6 col-xl-3">
+        <a href="{{ route('admin.payments.index') }}" class="text-decoration-none">
+            <div class="card h-100 p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="stat-icon icon-warning"><i class="bi bi-cash-coin"></i></span>
+                    <div>
+                        <div class="text-muted small">Payments to verify</div>
+                        <div class="h4 fw-bold mb-0 text-body">{{ number_format($stats['pending_payments']) }}</div>
+                        <div class="small text-muted">Open the queue</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <a href="{{ route('admin.invoices.index') }}" class="text-decoration-none">
+            <div class="card h-100 p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="stat-icon icon-danger"><i class="bi bi-receipt"></i></span>
+                    <div>
+                        <div class="text-muted small">Outstanding invoices</div>
+                        <div class="h4 fw-bold mb-0 text-body">{{ number_format($stats['outstanding_invoices']) }}</div>
+                        <div class="small text-muted">Unpaid or under review</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
 </div>
 
 <div class="card mt-4">

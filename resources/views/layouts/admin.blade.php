@@ -89,6 +89,19 @@
             <a href="{{ route('admin.simulation.index') }}" class="{{ request()->routeIs('admin.simulation.*') ? 'active' : '' }}">
                 <i class="bi bi-cpu"></i> Simulation
             </a>
+            <a href="{{ route('admin.invoices.index') }}" class="{{ request()->routeIs('admin.invoices.*') ? 'active' : '' }}">
+                <i class="bi bi-receipt"></i> Invoices
+            </a>
+            <a href="{{ route('admin.payments.index') }}" class="{{ request()->routeIs('admin.payments.*') ? 'active' : '' }} d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-shield-check"></i> Payments</span>
+                @php $pendingPaymentCount = \App\Models\Payment::where('status', 'pending_verification')->count(); @endphp
+                @if ($pendingPaymentCount)
+                    <span class="badge rounded-pill bg-danger">{{ $pendingPaymentCount }}</span>
+                @endif
+            </a>
+            <a href="{{ route('admin.payment-methods.index') }}" class="{{ request()->routeIs('admin.payment-methods.*') ? 'active' : '' }}">
+                <i class="bi bi-credit-card"></i> Payment methods
+            </a>
         </nav>
         <div class="sidebar-footer">
             <div class="mb-2"><i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}</div>

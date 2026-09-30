@@ -76,4 +76,42 @@
         </div>
     </div>
 </div>
+
+<div class="card mt-4">
+    <div class="card-header bg-white"><i class="bi bi-receipt me-1"></i> Invoices</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>For</th>
+                    <th class="text-end">Amount</th>
+                    <th>Status</th>
+                    <th>Due</th>
+                    <th class="text-end"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($invoices as $invoice)
+                    <tr>
+                        <td class="fw-semibold">{{ $invoice->number }}</td>
+                        <td class="small text-muted">
+                            {{ $invoice->plan?->name ?? $invoice->serviceStep?->title ?? '—' }}
+                        </td>
+                        <td class="text-end">{{ $invoice->totalLabel() }}</td>
+                        <td><span class="badge text-bg-{{ $invoice->statusColor() }}">{{ $invoice->statusLabel() }}</span></td>
+                        <td class="small text-muted">{{ $invoice->due_at?->format('M j, Y') ?? '—' }}</td>
+                        <td class="text-end">
+                            <a href="{{ route('billing.show', $invoice) }}" class="btn btn-sm btn-outline-primary">Open</a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No invoices yet.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 @endsection

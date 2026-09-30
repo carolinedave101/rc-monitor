@@ -3,7 +3,10 @@
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
 use App\Http\Controllers\Admin\FeatureController as AdminFeatureController;
+use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Admin\JourneyController as AdminJourneyController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\PaymentMethodController as AdminPaymentMethodController;
 use App\Http\Controllers\Admin\SimulationController as AdminSimulationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AlertController;
@@ -39,6 +42,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/live', [LiveController::class, 'dashboard'])->name('dashboard.live');
     Route::get('/journey', JourneyController::class)->name('journey.index');
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
+    Route::get('/billing/invoices/{invoice}', [BillingController::class, 'show'])->name('billing.show');
+    Route::post('/billing/invoices/{invoice}/payments', [BillingController::class, 'submitPayment'])->name('billing.payments.store');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
@@ -95,4 +100,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/simulation/devices/{device}/tick', [AdminSimulationController::class, 'tick'])->name('simulation.tick');
     Route::post('/simulation/devices/{device}/backfill', [AdminSimulationController::class, 'backfill'])->name('simulation.backfill');
     Route::post('/simulation/devices/{device}/wipe', [AdminSimulationController::class, 'wipe'])->name('simulation.wipe');
+
+    Route::get('/invoices', [AdminInvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/create', [AdminInvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('/invoices', [AdminInvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('/invoices/{invoice}', [AdminInvoiceController::class, 'show'])->name('invoices.show');
+    Route::post('/invoices/{invoice}/send', [AdminInvoiceController::class, 'send'])->name('invoices.send');
+    Route::post('/invoices/{invoice}/mark-paid', [AdminInvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
+    Route::post('/invoices/{invoice}/void', [AdminInvoiceController::class, 'void'])->name('invoices.void');
+    Route::post('/invoices/{invoice}/methods', [AdminInvoiceController::class, 'updateMethods'])->name('invoices.methods');
+
+    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/{payment}/proof', [AdminPaymentController::class, 'proof'])->name('payments.proof');
+    Route::post('/payments/{payment}/approve', [AdminPaymentController::class, 'approve'])->name('payments.approve');
+    Route::post('/payments/{payment}/reject', [AdminPaymentController::class, 'reject'])->name('payments.reject');
+
+    Route::get('/payment-methods', [AdminPaymentMethodController::class, 'index'])->name('payment-methods.index');
+    Route::post('/payment-methods', [AdminPaymentMethodController::class, 'store'])->name('payment-methods.store');
+    Route::patch('/payment-methods/{paymentMethod}', [AdminPaymentMethodController::class, 'update'])->name('payment-methods.update');
 });

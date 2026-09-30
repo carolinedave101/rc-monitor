@@ -61,6 +61,16 @@ class User extends Authenticatable
         return $this->belongsTo(Plan::class);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public function deviceLimit(): int
     {
         return $this->plan?->device_limit ?? self::DEFAULT_DEVICE_LIMIT;

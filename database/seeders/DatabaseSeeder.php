@@ -10,6 +10,8 @@ use App\Models\DeviceCall;
 use App\Models\DeviceLocation;
 use App\Models\DeviceMessage;
 use App\Models\DeviceShare;
+use App\Models\Invoice;
+use App\Models\PaymentMethod;
 use App\Models\Plan;
 use App\Models\User;
 use App\Services\SimulationEngine;
@@ -27,6 +29,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(FeatureSeeder::class);
         $this->call(PlanSeeder::class);
+        $this->call(PaymentMethodSeeder::class);
 
         $user = User::factory()->admin()->create([
             'name' => 'Test User',
@@ -147,5 +150,61 @@ class DatabaseSeeder extends Seeder
             'acknowledged_at' => now()->subHours(2)->addMinutes(4),
             'result' => 'Location refreshed',
         ]);
+
+        $methodIds = PaymentMethod::query()->pluck('id');
+        $bankMethod = PaymentMethod::query()->where('type', 'bank_transfer')->first();
+
+        $paidInvoice = Invoice::create([
+            'user_id' => $user->id,
+            'plan_id' => $standard?->id,
+            'number' => 'INV-00001',
+            'status' => 'paid',
+            'subtotal_cents' => 4900,
+            'total_cents' => 4900,
+            'issued_at' => now()->subDays(10),
+            'paid_at' => now()->subDays(9),
+            'created_by' => $user->id,
+        ]);
+
+        $paidInvoice->items()->create([
+            'description' => 'Standard plan — up to 5 devices',
+            'quantity' => 1,
+            'unit_price_cents' => 4900,
+        ]);
+
+        $paidInvoice->paymentMethods()->attach($methodIds);
+
+        $paidInvoice->payments()->create([
+            'user_id' => $user->id,
+            'payment_method_id' => $bankMethod?->id,
+            'amount_cents' => 4900,
+            'reference' => 'BANK-88213',
+            'status' => 'approved',
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now()->subDays(9),
+        ]);
+
+        $reviewStep = $user->serviceSteps()->where('position', 3)->first();
+
+        $openInvoice = Invoice::create([
+            'user_id' => $user->id,
+            'service_step_id' => $reviewStep?->id,
+            'number' => 'INV-00002',
+            'status' => 'sent',
+            'subtotal_cents' => 9900,
+            'total_cents' => 9900,
+            'issued_at' => now()->subDays(2),
+            'due_at' => now()->addDays(5),
+            'notes' => 'Covers the guided baseline activity review session.',
+            'created_by' => $user->id,
+        ]);
+
+        $openInvoice->items()->create([
+            'description' => 'Guided baseline activity review',
+            'quantity' => 1,
+            'unit_price_cents' => 9900,
+        ]);
+
+        $openInvoice->paymentMethods()->attach($methodIds);
     }
 }
