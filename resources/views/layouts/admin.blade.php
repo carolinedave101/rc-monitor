@@ -80,6 +80,12 @@
             <a href="{{ route('admin.features.index') }}" class="{{ request()->routeIs('admin.features.*') ? 'active' : '' }}">
                 <i class="bi bi-grid-3x3-gap"></i> Features
             </a>
+            <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <i class="bi bi-people"></i> Accounts
+            </a>
+            <a href="{{ route('admin.devices.index') }}" class="{{ request()->routeIs('admin.devices.*') ? 'active' : '' }}">
+                <i class="bi bi-phone"></i> Devices
+            </a>
         </nav>
         <div class="sidebar-footer">
             <div class="mb-2"><i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}</div>

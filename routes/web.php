@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
 use App\Http\Controllers\Admin\FeatureController as AdminFeatureController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -42,4 +44,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('/features', [AdminFeatureController::class, 'index'])->name('features.index');
     Route::patch('/features/{feature}', [AdminFeatureController::class, 'update'])->name('features.update');
+
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+
+    Route::get('/devices', [AdminDeviceController::class, 'index'])->name('devices.index');
+    Route::patch('/devices/{device}', [AdminDeviceController::class, 'updateStatus'])->name('devices.update-status');
+    Route::post('/devices/{device}/rotate-token', [AdminDeviceController::class, 'rotateToken'])->name('devices.rotate-token');
 });
