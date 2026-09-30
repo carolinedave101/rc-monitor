@@ -54,4 +54,39 @@
         </div>
     </div>
 </div>
+
+<div class="card mt-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <span>Recent admin activity</span>
+        <span class="badge text-bg-light">{{ $recentActivity->count() }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>When</th>
+                    <th>Admin</th>
+                    <th>Action</th>
+                    <th>Subject</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($recentActivity as $log)
+                    <tr>
+                        <td class="text-muted small">{{ $log->created_at->diffForHumans() }}</td>
+                        <td>{{ $log->user?->name ?? 'System' }}</td>
+                        <td><code class="small">{{ $log->action }}</code></td>
+                        <td class="text-muted small">
+                            {{ $log->auditable_type ? class_basename($log->auditable_type).' #'.$log->auditable_id : '—' }}
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">No admin activity yet.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 @endsection
