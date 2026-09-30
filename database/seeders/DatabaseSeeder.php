@@ -37,6 +37,12 @@ class DatabaseSeeder extends Seeder
             'last_seen_at' => now(),
         ]);
 
+        $active->simulationProfile()->create([
+            'enabled' => true,
+            'activity_level' => 'normal',
+            'last_tick_at' => now()->subMinutes(15),
+        ]);
+
         Device::factory()->for($user)->create([
             'name' => 'Work Tablet',
             'manufacturer' => 'Samsung',

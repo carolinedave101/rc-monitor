@@ -86,6 +86,9 @@
             <a href="{{ route('admin.devices.index') }}" class="{{ request()->routeIs('admin.devices.*') ? 'active' : '' }}">
                 <i class="bi bi-phone"></i> Devices
             </a>
+            <a href="{{ route('admin.simulation.index') }}" class="{{ request()->routeIs('admin.simulation.*') ? 'active' : '' }}">
+                <i class="bi bi-cpu"></i> Simulation
+            </a>
         </nav>
         <div class="sidebar-footer">
             <div class="mb-2"><i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}</div>

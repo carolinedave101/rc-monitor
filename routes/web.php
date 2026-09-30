@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
 use App\Http\Controllers\Admin\FeatureController as AdminFeatureController;
 use App\Http\Controllers\Admin\JourneyController as AdminJourneyController;
+use App\Http\Controllers\Admin\SimulationController as AdminSimulationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
@@ -63,4 +64,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/devices/{device}', [AdminDeviceController::class, 'updateStatus'])->name('devices.update-status');
     Route::patch('/devices/{device}/features/{feature}', [AdminDeviceController::class, 'updateFeature'])->name('devices.features.update');
     Route::post('/devices/{device}/rotate-token', [AdminDeviceController::class, 'rotateToken'])->name('devices.rotate-token');
+
+    Route::get('/simulation', [AdminSimulationController::class, 'index'])->name('simulation.index');
+    Route::patch('/simulation/settings', [AdminSimulationController::class, 'updateSettings'])->name('simulation.settings');
+    Route::patch('/simulation/devices/{device}', [AdminSimulationController::class, 'updateProfile'])->name('simulation.profiles.update');
+    Route::post('/simulation/devices/{device}/tick', [AdminSimulationController::class, 'tick'])->name('simulation.tick');
+    Route::post('/simulation/devices/{device}/backfill', [AdminSimulationController::class, 'backfill'])->name('simulation.backfill');
+    Route::post('/simulation/devices/{device}/wipe', [AdminSimulationController::class, 'wipe'])->name('simulation.wipe');
 });
