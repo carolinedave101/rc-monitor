@@ -113,3 +113,36 @@ Copy backups off the server regularly (object storage, rsync, etc.) and test a r
 - Re-run `config:cache route:cache view:cache` after every deploy
 - Pause the scheduler during large migrations if needed (`Settings` global simulation pause
   is available in **Admin → Simulation**)
+
+## 10. Hugging Face Spaces (free demo)
+
+The repository ships a `Dockerfile` and `docker/entrypoint.sh` for free
+[Hugging Face Spaces](https://huggingface.co/spaces) Docker hosting. Each container boot
+creates a fresh SQLite database, migrates and seeds it, then runs `php artisan serve` on
+port 7860 together with `php artisan schedule:work`.
+
+Free Spaces have an **ephemeral filesystem**: devices, alerts, uploads and backups reset
+whenever the Space sleeps, restarts or rebuilds. Use it for demos only, never real data.
+
+Setup:
+
+1. Generate a key locally: `php artisan key:generate --show`.
+2. Create a Space at https://huggingface.co/new-space — SDK **Docker**, Blank, **Public**.
+3. In **Settings → Variables and secrets**, set:
+   - Secret `APP_KEY` = the key from step 1
+   - Variable `APP_URL` = `https://<user>-<space>.hf.space`
+   - Variables `APP_ENV=production`, `APP_DEBUG=false`, `SESSION_DRIVER=database`,
+     `CACHE_STORE=database`, `QUEUE_CONNECTION=database`, `DB_CONNECTION=sqlite`,
+     `MAIL_MAILER=log`
+4. Push the code:
+
+   ```bash
+   git remote add hf https://huggingface.co/spaces/<user>/<space>
+   git push hf main    # username + HF write token as the password
+   ```
+
+5. Watch the **Build logs** tab. The app is live at `https://<user>-<space>.hf.space`
+   once the build finishes; log in with the seeded demo accounts.
+
+If `APP_KEY` is not set, the entrypoint generates one on boot; sessions are invalidated
+whenever that key changes, so setting the secret is recommended.

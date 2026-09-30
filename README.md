@@ -1,3 +1,12 @@
+---
+title: ROYALTRICO
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # ROYALTRICO — rc-monitor
 
 Consent-based device & family monitoring. Enroll devices you own — or devices whose owner
@@ -146,7 +155,8 @@ php artisan test
   `php artisan schedule:work` or a cron entry in production.
 - Backups: `php artisan backup:database --keep=7`, also available in **Admin → System**.
 - Health: `GET /up` and the **Admin → System** page.
-- Deployment guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+- Deployment guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+- Free Hugging Face Spaces deployment: [docs/HF_SPACES_DEPLOY.md](docs/HF_SPACES_DEPLOY.md)
 
 ## Project layout
 
