@@ -14,6 +14,7 @@ use App\Models\Invoice;
 use App\Models\PaymentMethod;
 use App\Models\Plan;
 use App\Models\User;
+use App\Services\Settings;
 use App\Services\SimulationEngine;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -30,6 +31,8 @@ class DatabaseSeeder extends Seeder
         $this->call(FeatureSeeder::class);
         $this->call(PlanSeeder::class);
         $this->call(PaymentMethodSeeder::class);
+
+        Settings::set('support_email', 'support@royaltrico.example');
 
         $user = User::factory()->admin()->create([
             'name' => 'Test User',

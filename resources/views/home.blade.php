@@ -596,7 +596,7 @@
                 <ul class="list-unstyled">
                     <li class="d-flex gap-3 mb-3">
                         <i class="bi bi-envelope-fill text-primary fs-5"></i>
-                        <span>support@yoursite.example</span>
+                        <span>{{ \App\Services\Settings::get('support_email', 'support@royaltrico.example') }}</span>
                     </li>
                     <li class="d-flex gap-3 mb-3">
                         <i class="bi bi-chat-fill text-primary fs-5"></i>
@@ -691,17 +691,17 @@
             <div class="col-6 col-lg-2">
                 <div class="fw-semibold mb-2">Company</div>
                 <ul class="list-unstyled footer-note">
-                    <li class="mb-1">About</li>
+                    <li class="mb-1"><a class="text-decoration-none" href="{{ route('pages.about') }}">About</a></li>
                     <li class="mb-1"><a class="text-decoration-none" href="#support">Support</a></li>
-                    <li class="mb-1">Privacy policy</li>
-                    <li class="mb-1">Terms of service</li>
+                    <li class="mb-1"><a class="text-decoration-none" href="{{ route('pages.privacy') }}">Privacy policy</a></li>
+                    <li class="mb-1"><a class="text-decoration-none" href="{{ route('pages.terms') }}">Terms of service</a></li>
                 </ul>
             </div>
             <div class="col-lg-4">
                 <div class="fw-semibold mb-2">Contact</div>
                 <ul class="list-unstyled footer-note">
                     <li class="mb-1"><i class="bi bi-geo-alt me-1"></i>150 Motor Pkwy, Suite 401, Hauppauge, NY 11788</li>
-                    <li class="mb-1"><i class="bi bi-envelope me-1"></i>support@yoursite.example</li>
+                        <li class="mb-1"><i class="bi bi-envelope me-1"></i>{{ \App\Services\Settings::get('support_email', 'support@royaltrico.example') }}</li>
                 </ul>
             </div>
         </div>

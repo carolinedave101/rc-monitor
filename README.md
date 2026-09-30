@@ -59,6 +59,24 @@ Seeded demo accounts:
 - QR code and enrollment link for setting up the agent on a device (`/enroll/{token}`)
 - Remote commands (lock / ring / locate) delivered to the agent on its next heartbeat, with
   acknowledgement feedback and history
+- Billing: plans with device limits, invoices with multiple payment methods (bank transfer,
+  PayPal, CashApp, crypto), proof-of-payment upload and manual verification
+- Service plan (journey) steps gated on payment: paying an invoice advances the step
+- Public About, Privacy and Terms pages (`/about`, `/privacy`, `/terms`)
+
+## Payments workflow
+
+1. Admin creates an invoice at `/admin/invoices` — optionally linked to a plan or a customer's
+   journey step — and attaches one or more payment methods.
+2. Sending the invoice notifies the customer; it appears under `/billing`.
+3. The customer pays out-of-band and uploads proof (JPG/PNG/WEBP/PDF, max 5 MB) with an
+   optional reference. The invoice moves to `awaiting_verification` and admins are notified.
+4. Admin reviews the proof at `/admin/payments` and approves or rejects with a reason
+   (the customer sees the reason and can re-upload).
+5. Approval marks the invoice paid, applies the linked plan entitlement and completes the
+   linked journey step, starting the next one.
+
+Admins can also mark an invoice paid manually, void it, or update its payment methods at any time.
 
 ## Agent API
 

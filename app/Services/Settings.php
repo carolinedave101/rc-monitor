@@ -3,11 +3,16 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Schema;
 
 class Settings
 {
     public static function get(string $key, ?string $default = null): ?string
     {
+        if (! Schema::hasTable('settings')) {
+            return $default;
+        }
+
         return Setting::query()->where('key', $key)->value('value') ?? $default;
     }
 

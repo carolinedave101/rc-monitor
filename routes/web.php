@@ -19,6 +19,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\JourneyController;
 use App\Http\Controllers\LiveController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ShareController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,10 @@ Route::get('/', fn () => view('home'))->name('home');
 Route::get('/enroll/{token}', [EnrollmentController::class, 'show'])
     ->middleware('throttle:30,1')
     ->name('enroll.show');
+
+Route::get('/about', [PageController::class, 'about'])->name('pages.about');
+Route::get('/privacy', [PageController::class, 'privacy'])->name('pages.privacy');
+Route::get('/terms', [PageController::class, 'terms'])->name('pages.terms');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
