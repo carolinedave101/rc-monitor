@@ -12,6 +12,8 @@ use App\Notifications\PaymentRejected;
 
 class InvoiceManager
 {
+    public function __construct(private readonly JourneyManager $journeys) {}
+
     public function send(Invoice $invoice): void
     {
         $invoice->update([
@@ -43,7 +45,20 @@ class InvoiceManager
             ]);
         }
 
+        $this->applyStepEntitlement($invoice);
+
         $invoice->user->notify(new PaymentApproved($invoice));
+    }
+
+    protected function applyStepEntitlement(Invoice $invoice): void
+    {
+        $step = $invoice->serviceStep;
+
+        if (! $step || $step->isCompleted() || $step->isPaused()) {
+            return;
+        }
+
+        $this->journeys->advance($step);
     }
 
     public function approvePayment(Payment $payment, User $admin): void
@@ -75,6 +90,12 @@ class InvoiceManager
             'status' => 'rejected',
             'rejection_reason' => $reason,
         ]);
+
+        $step = $payment->invoice->serviceStep;
+
+        if ($step && $step->status === 'awaiting_verification') {
+            $step->update(['status' => 'awaiting_payment']);
+        }
 
         $payment->user->notify(new PaymentRejected($payment));
 

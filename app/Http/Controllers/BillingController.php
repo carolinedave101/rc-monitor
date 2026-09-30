@@ -69,6 +69,14 @@ class BillingController extends Controller
             'rejection_reason' => null,
         ]);
 
+        $step = $invoice->serviceStep;
+
+        if ($step && $step->status === 'awaiting_payment') {
+            $step->update(['status' => 'awaiting_verification']);
+
+            AuditLog::record('journey.step.awaiting_verification', $step, ['invoice' => $invoice->number]);
+        }
+
         AuditLog::record('payment.submitted', $payment, [
             'invoice' => $invoice->number,
             'amount_cents' => $payment->amount_cents,

@@ -101,20 +101,21 @@ class DatabaseSeeder extends Seeder
         Alert::factory()->for($user)->for($active)->read()->create();
 
         $steps = [
-            ['Account & consent', 'Registration completed and consent recorded.', 'completed'],
-            ['Device enrollment & agent connection', 'Install the agent and connect the first device.', 'in_progress'],
-            ['Baseline activity review', 'Walk through the first days of calls, messages and locations together.', 'pending'],
-            ['Alerts configured & tuned', 'Set keyword and geofence rules that fit the family.', 'pending'],
-            ['Ongoing monitoring & support', 'Regular check-ins and support for the account.', 'pending'],
+            ['Account & consent', 'Registration completed and consent recorded.', 'completed', false],
+            ['Device enrollment & agent connection', 'Install the agent and connect the first device.', 'completed', false],
+            ['Baseline activity review', 'Walk through the first days of calls, messages and locations together.', 'awaiting_payment', true],
+            ['Alerts configured & tuned', 'Set keyword and geofence rules that fit the family.', 'pending', false],
+            ['Ongoing monitoring & support', 'Regular check-ins and support for the account.', 'pending', false],
         ];
 
-        foreach ($steps as $index => [$title, $description, $status]) {
+        foreach ($steps as $index => [$title, $description, $status, $requiresPayment]) {
             $user->serviceSteps()->create([
                 'title' => $title,
                 'description' => $description,
                 'position' => $index + 1,
                 'status' => $status,
-                'completed_at' => $status === 'completed' ? now()->subDays(6) : null,
+                'requires_payment' => $requiresPayment,
+                'completed_at' => $status === 'completed' ? now()->subDays(6 - $index) : null,
             ]);
         }
 

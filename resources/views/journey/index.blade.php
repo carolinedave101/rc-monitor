@@ -49,7 +49,17 @@
                 @endif
 
                 @if ($step->requires_payment && ! $step->isCompleted())
-                    <div class="small text-muted"><i class="bi bi-credit-card me-1"></i>Payment required before this step can complete.</div>
+                    @php $outstandingInvoice = $step->outstandingInvoice(); @endphp
+                    @if ($outstandingInvoice)
+                        <div class="mt-3">
+                            <a href="{{ route('billing.show', $outstandingInvoice) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-credit-card me-1"></i>
+                                Pay {{ $outstandingInvoice->number }} — {{ $outstandingInvoice->totalLabel() }}
+                            </a>
+                        </div>
+                    @else
+                        <div class="small text-muted"><i class="bi bi-credit-card me-1"></i>Payment required before this step can complete.</div>
+                    @endif
                 @endif
 
                 @if ($step->completed_at)

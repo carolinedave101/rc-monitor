@@ -90,6 +90,14 @@ class InvoiceController extends Controller
 
         $invoice->paymentMethods()->sync($data['methods']);
 
+        if ($invoice->serviceStep && ! $invoice->serviceStep->isCompleted()) {
+            $invoice->serviceStep->update(['status' => 'awaiting_payment']);
+
+            AuditLog::record('journey.step.awaiting_payment', $invoice->serviceStep, [
+                'invoice' => $invoice->number,
+            ]);
+        }
+
         AuditLog::record('invoice.created', $invoice, [
             'number' => $invoice->number,
             'total_cents' => $amountCents,
@@ -141,6 +149,14 @@ class InvoiceController extends Controller
     public function void(Invoice $invoice): RedirectResponse
     {
         $invoice->update(['status' => 'void']);
+
+        $step = $invoice->serviceStep;
+
+        if ($step && $step->status === 'awaiting_payment') {
+            $step->update(['status' => 'in_progress']);
+
+            AuditLog::record('journey.step.payment_reverted', $step, ['invoice' => $invoice->number]);
+        }
 
         AuditLog::record('invoice.voided', $invoice, ['number' => $invoice->number]);
 
