@@ -64,6 +64,23 @@ Authorization: Bearer <agent_token>
 New devices are created as `pending` and activate automatically on their first
 successful check-in. Suspended devices are rejected.
 
+## Admin control plane
+
+The admin area lives at `/admin` and requires an account with `is_admin`. The seeded
+local account `test@example.com` / `password` is an admin.
+
+Currently the admin can:
+
+- view platform stats and the audit trail on the dashboard
+- set the status of every advertised feature (`live`, `simulated`, `beta`, `coming_soon`,
+  `disabled`) and control whether it is visible to customers
+- manage accounts and devices (device status changes, agent token rotation)
+- manage a customer's service plan: add steps, start, complete & continue, pause with a
+  reason (optionally suspending that customer's devices while paused), resume and remove
+  steps
+
+Customers see their plan status on the dashboard and at `/journey`.
+
 ## Testing
 
 ```bash
