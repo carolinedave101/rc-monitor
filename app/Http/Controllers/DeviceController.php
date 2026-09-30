@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Consent;
 use App\Models\Device;
 use Illuminate\Http\Request;
@@ -152,7 +153,6 @@ class DeviceController extends Controller
     public function markConsented(Request $request, Device $device)
     {
         $this->authorizeOwner($device);
-
         $device->update([
             'consent_recorded' => true,
             'consented_at' => now(),
@@ -162,6 +162,17 @@ class DeviceController extends Controller
         $this->recordConsent($request, $device, 'enrollment');
 
         return redirect()->route('devices.show', $device)->with('status', 'Consent recorded. Device is now active.');
+    }
+
+    public function rotateToken(Device $device)
+    {
+        $this->authorizeOwner($device);
+
+        $device->update(['agent_token' => Device::generateToken()]);
+
+        AuditLog::record('device.token.rotated', $device, ['by' => 'owner']);
+
+        return back()->with('status', 'Enrollment token regenerated. Update the agent with the new token — the old one stops working immediately.');
     }
 
     private function recordConsent(Request $request, Device $device, string $type): void

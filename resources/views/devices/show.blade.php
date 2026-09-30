@@ -127,6 +127,10 @@
                         <div class="input-group mb-2">
                             <input type="text" class="form-control font-monospace" id="agent-token" value="{{ $device->agent_token }}" readonly>
                             <button class="btn btn-outline-secondary" type="button" onclick="copyToken()"><i class="bi bi-clipboard"></i></button>
+                            <form method="POST" action="{{ route('devices.rotate-token', $device) }}" onsubmit="return confirm('Regenerate the enrollment token? The agent will stop reporting until it is updated with the new token.')">
+                                @csrf
+                                <button class="btn btn-outline-secondary" type="submit" title="Regenerate token"><i class="bi bi-arrow-repeat"></i></button>
+                            </form>
                         </div>
                         <p class="text-muted small mb-0">Send it to the agent:
                             <code>Authorization: Bearer {{ $device->agent_token }}</code> to

@@ -136,6 +136,38 @@ class DeviceManagementTest extends TestCase
         $this->assertDatabaseMissing('devices', ['id' => $device->id]);
     }
 
+    public function test_owner_can_regenerate_the_agent_token()
+    {
+        $user = User::factory()->create();
+        $device = Device::factory()->for($user)->create();
+        $original = $device->agent_token;
+
+        $this->actingAs($user)
+            ->post("/devices/{$device->id}/rotate-token")
+            ->assertRedirect("/devices/{$device->id}");
+
+        $this->assertNotSame($original, $device->fresh()->agent_token);
+        $this->assertSame(64, strlen($device->fresh()->agent_token));
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'device.token.rotated',
+            'auditable_id' => $device->id,
+        ]);
+    }
+
+    public function test_non_owner_cannot_regenerate_the_agent_token()
+    {
+        $owner = User::factory()->create();
+        $other = User::factory()->create();
+        $device = Device::factory()->for($owner)->create();
+        $original = $device->agent_token;
+
+        $this->actingAs($other)
+            ->post("/devices/{$device->id}/rotate-token")
+            ->assertForbidden();
+
+        $this->assertSame($original, $device->fresh()->agent_token);
+    }
+
     public function test_several_tabs_render_on_device_show()
     {
         $user = User::factory()->create();

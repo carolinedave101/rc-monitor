@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/devices/{device}/commands', [DeviceCommandController::class, 'store'])->name('device-commands.store');
     Route::patch('/devices/{device}/status', [DeviceController::class, 'updateStatus'])->name('devices.status');
     Route::post('/devices/{device}/consent', [DeviceController::class, 'markConsented'])->name('devices.consent');
+    Route::post('/devices/{device}/rotate-token', [DeviceController::class, 'rotateToken'])->name('devices.rotate-token');
     Route::delete('/devices/{device}', [DeviceController::class, 'destroy'])->name('devices.destroy');
 
     Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
