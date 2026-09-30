@@ -143,6 +143,7 @@ class DeviceManagementTest extends TestCase
         $original = $device->agent_token;
 
         $this->actingAs($user)
+            ->from("/devices/{$device->id}")
             ->post("/devices/{$device->id}/rotate-token")
             ->assertRedirect("/devices/{$device->id}");
 
