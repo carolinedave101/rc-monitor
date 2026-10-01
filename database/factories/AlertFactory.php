@@ -15,14 +15,17 @@ class AlertFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(['keyword', 'geofence']);
+        $keyword = $this->faker->randomElement(['help', 'urgent', 'address']);
 
         return [
             'type' => $type,
             'severity' => $this->faker->randomElement(['info', 'warning', 'critical']),
             'title' => $type === 'keyword'
-                ? 'Keyword match: "'.$this->faker->randomElement(['help', 'urgent', 'address']).'"'
+                ? 'Keyword match: "'.$keyword.'"'
                 : 'Device left safe zone',
-            'body' => $this->faker->sentence(12),
+            'body' => $type === 'keyword'
+                ? 'A message on this device matched the keyword "'.$keyword.'". Review the conversation in the Messages tab.'
+                : 'The device moved outside the configured safe zone. Check the latest locations on the device page.',
             'read_at' => null,
         ];
     }

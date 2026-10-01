@@ -6,7 +6,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
         <h1 class="page-head h3 mb-1">Dashboard</h1>
-        <p class="text-muted small mb-0">Welcome back — here's what's happening across your devices. <span id="live-updated" class="text-muted"></span></p>
+        <p class="text-muted small mb-0">Welcome back — here's what's happening across your devices. <span class="live-pulse me-1"></span><span id="live-updated" class="text-muted">Live</span></p>
     </div>
     <a href="{{ route('devices.create') }}" class="btn btn-primary px-4"><i class="bi bi-plus-lg me-1"></i> Enroll device</a>
 </div>
@@ -47,6 +47,18 @@
                 <div class="text-muted small">Unread alerts</div>
             </div>
         </div></div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span><i class="bi bi-activity text-primary me-1"></i> Activity — last 7 days</span>
+        <span class="small text-muted">Calls and messages across your devices</span>
+    </div>
+    <div class="card-body">
+        <div class="chart-wrap">
+            <canvas id="activity-chart"></canvas>
+        </div>
     </div>
 </div>
 
@@ -127,7 +139,7 @@
                 <span><i class="bi bi-bell-fill text-primary me-1"></i> Recent alerts</span>
                 <a href="{{ route('alerts.index') }}" class="small">View all</a>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body p-0" id="recent-alerts-list">
                 @forelse ($recentAlerts as $alert)
                     <div class="border-bottom p-3">
                         <div class="d-flex justify-content-between">
@@ -183,15 +195,80 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 (function () {
     const url = @json(route('dashboard.live'));
     const timeFormatter = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    const severityClass = { critical: 'danger', warning: 'warning', info: 'info' };
+
+    function escapeHtml(value) {
+        const div = document.createElement('div');
+        div.textContent = value ?? '';
+        return div.innerHTML;
+    }
+
+    function renderAlerts(alerts) {
+        const list = document.getElementById('recent-alerts-list');
+        if (!list || !Array.isArray(alerts)) return;
+
+        if (alerts.length === 0) {
+            list.innerHTML = '<div class="text-center text-muted py-5"><i class="bi bi-bell" style="font-size: 3rem;"></i><p class="mt-2 mb-0">No alerts yet.</p></div>';
+            return;
+        }
+
+        list.innerHTML = alerts.map(function (alert) {
+            const severity = severityClass[alert.severity] || 'info';
+            const label = alert.severity ? alert.severity.charAt(0).toUpperCase() + alert.severity.slice(1) : '';
+            return '<div class="border-bottom p-3">'
+                + '<div class="d-flex justify-content-between">'
+                + '<span class="fw-semibold">' + escapeHtml(alert.title) + '</span>'
+                + '<span class="badge status-badge bg-' + severity + '">' + escapeHtml(label) + '</span>'
+                + '</div>'
+                + '<div class="small text-muted mt-1">' + escapeHtml(alert.device) + ' · ' + escapeHtml(alert.created_at_human) + '</div>'
+                + '</div>';
+        }).join('');
+    }
+
+    const canvas = document.getElementById('activity-chart');
+    if (canvas && window.Chart) {
+        new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: @json($activityLabels),
+                datasets: [
+                    {
+                        label: 'Messages',
+                        data: @json($activityMessages),
+                        backgroundColor: 'rgba(27, 111, 245, .7)',
+                        borderRadius: 6,
+                    },
+                    {
+                        label: 'Calls',
+                        data: @json($activityCalls),
+                        backgroundColor: 'rgba(13, 59, 191, .85)',
+                        borderRadius: 6,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { precision: 0 } },
+                },
+            },
+        });
+    }
 
     async function poll() {
         try {
             const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
-            if (!response.ok) return;
+            if (!response.ok) throw new Error('HTTP ' + response.status);
             const data = await response.json();
 
             document.getElementById('stat-total').textContent = data.stats.total;
@@ -216,12 +293,14 @@
                 badge.classList.toggle('d-none', data.stats.notifications === 0);
             }
 
-            document.getElementById('live-updated').textContent = '· updated ' + timeFormatter.format(new Date());
+            renderAlerts(data.alerts);
+            document.getElementById('live-updated').textContent = 'Live · updated ' + timeFormatter.format(new Date());
         } catch (error) {
-            // Keep the last known state when polling fails.
+            document.getElementById('live-updated').textContent = 'Reconnecting…';
         }
     }
 
+    poll();
     setInterval(poll, 15000);
 })();
 </script>

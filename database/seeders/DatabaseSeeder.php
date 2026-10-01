@@ -53,6 +53,8 @@ class DatabaseSeeder extends Seeder
             'manufacturer' => 'Google',
             'model' => 'Pixel 8',
             'os' => 'android',
+            'os_version' => '14',
+            'phone_number' => '+15550100100',
             'status' => 'active',
             'last_seen_at' => now(),
         ]);
@@ -83,11 +85,11 @@ class DatabaseSeeder extends Seeder
             'last_seen_at' => now()->subDays(3),
         ]);
 
-        DeviceCall::factory()->count(12)->for($active)->create();
-        DeviceMessage::factory()->count(20)->for($active)->create();
-        DeviceLocation::factory()->count(10)->for($active)->create();
+        DeviceCall::factory()->count(12)->for($active)->create(['source' => 'simulated']);
+        DeviceMessage::factory()->count(20)->for($active)->create(['source' => 'simulated']);
+        DeviceLocation::factory()->count(10)->for($active)->create(['source' => 'simulated']);
 
-        DeviceCall::factory()->count(3)->for($suspended)->create();
+        DeviceCall::factory()->count(3)->for($suspended)->create(['source' => 'simulated']);
 
         AlertRule::factory()->for($user)->keyword('help')->create([
             'device_id' => $active->id,

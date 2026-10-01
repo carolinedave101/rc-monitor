@@ -14,11 +14,13 @@ class DeviceCallFactory extends Factory
 
     public function definition(): array
     {
+        $direction = $this->faker->randomElement(['incoming', 'outgoing', 'outgoing', 'missed']);
+
         return [
-            'direction' => $this->faker->randomElement(['incoming', 'outgoing', 'missed']),
+            'direction' => $direction,
             'contact_name' => $this->faker->name(),
             'phone_number' => '+1555'.$this->faker->numerify('#######'),
-            'duration_seconds' => $this->faker->numberBetween(0, 3600),
+            'duration_seconds' => $direction === 'missed' ? 0 : $this->faker->numberBetween(20, 1800),
             'started_at' => $this->faker->dateTimeThisMonth(),
         ];
     }

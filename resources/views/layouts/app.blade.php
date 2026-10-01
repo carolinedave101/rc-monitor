@@ -165,7 +165,25 @@
         .auth-logo { width: 4.2rem; height: 4.2rem; border-radius: 1.1rem; object-fit: cover; box-shadow: 0 .6rem 1.4rem rgba(13,59,191,.25); }
         footer a { color: var(--muted); }
         footer a:hover { color: var(--brand-2); }
+
+        /* Live + charts */
+        .live-pulse {
+            display: inline-block; width: .55rem; height: .55rem; border-radius: 50%;
+            background: #22c55e; vertical-align: middle;
+            animation: live-pulse 2s infinite;
+        }
+        @keyframes live-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, .55); }
+            70% { box-shadow: 0 0 0 .5rem rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        .chart-wrap { position: relative; height: 260px; }
+        .chart-wrap-sm { position: relative; height: 200px; }
+        .map-wrap { height: 420px; border-radius: var(--radius); overflow: hidden; z-index: 0; }
+        .provenance-badge { font-size: .62rem; vertical-align: middle; }
+        .leaflet-popup-content { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: .82rem; }
     </style>
+    @stack('styles')
 </head>
 <body>
 @auth

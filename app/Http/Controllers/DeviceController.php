@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AlertRule;
 use App\Models\AuditLog;
 use App\Models\Consent;
 use App\Models\Device;
@@ -86,6 +87,11 @@ class DeviceController extends Controller
         $alerts = $device->alerts()->latest()->limit(20)->get();
 
         $appActivities = $device->appActivities()->latest('launched_at')->limit(100)->get();
+        $appUsage = $appActivities
+            ->groupBy('app_name')
+            ->map(fn ($items) => (int) $items->sum('duration_seconds'))
+            ->sortDesc()
+            ->take(8);
         $contacts = $device->contacts()->orderBy('name')->limit(200)->get();
         $diagnostics = $device->diagnostics()->latest('recorded_at')->limit(24)->get();
         $browser = $device->browserHistories()->latest('visited_at')->limit(100)->get();
@@ -93,6 +99,16 @@ class DeviceController extends Controller
         $media = $device->media()->latest('taken_at')->limit(100)->get();
         $notes = $device->notes()->latest('updated_at')->limit(100)->get();
         $calendar = $device->calendarEvents()->latest('starts_at')->limit(100)->get();
+
+        $geofences = AlertRule::query()
+            ->where('type', 'geofence')
+            ->where('enabled', true)
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where(function ($query) use ($device) {
+                $query->where('device_id', $device->id)->orWhereNull('device_id');
+            })
+            ->get(['id', 'latitude', 'longitude', 'radius_meters', 'severity']);
 
         $shares = $isOwner
             ? $device->shares()->whereIn('status', ['pending', 'accepted'])->with('viewer')->latest()->get()
@@ -114,6 +130,7 @@ class DeviceController extends Controller
             'messagesPlatforms',
             'alerts',
             'appActivities',
+            'appUsage',
             'contacts',
             'diagnostics',
             'browser',
@@ -121,6 +138,7 @@ class DeviceController extends Controller
             'media',
             'notes',
             'calendar',
+            'geofences',
         ));
     }
 

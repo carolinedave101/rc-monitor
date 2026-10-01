@@ -59,12 +59,24 @@
         .icon-info { background: #e7f6fb; color: #1598c0; }
         .table thead th { text-transform: uppercase; font-size: .72rem; letter-spacing: .05em; color: var(--muted); }
         .badge { border-radius: 999px; font-weight: 600; }
+        .chart-wrap { position: relative; height: 260px; }
+        .live-pulse {
+            display: inline-block; width: .55rem; height: .55rem; border-radius: 50%;
+            background: #22c55e; vertical-align: middle;
+            animation: live-pulse 2s infinite;
+        }
+        @keyframes live-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, .55); }
+            70% { box-shadow: 0 0 0 .5rem rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
         @media (max-width: 991.98px) {
             .admin-shell { flex-direction: column; }
             .admin-sidebar { width: 100%; height: auto; position: static; }
             .admin-main { padding: 1.25rem; }
         }
     </style>
+    @stack('styles')
 </head>
 <body>
 <div class="admin-shell">
@@ -150,5 +162,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+@stack('scripts')
 </body>
 </html>

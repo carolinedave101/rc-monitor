@@ -85,6 +85,18 @@
 
 <div class="card mt-4">
     <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-activity me-1"></i> Platform activity — last 14 days</span>
+        <span class="small text-muted">Calls, messages and alerts across all devices</span>
+    </div>
+    <div class="card-body">
+        <div class="chart-wrap">
+            <canvas id="admin-activity-chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
         <span>Recent admin activity</span>
         <span class="badge text-bg-light">{{ $recentActivity->count() }}</span>
     </div>
@@ -118,3 +130,60 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const canvas = document.getElementById('admin-activity-chart');
+    if (!canvas || !window.Chart) return;
+
+    new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: @json($activityLabels),
+            datasets: [
+                {
+                    label: 'Messages',
+                    data: @json($activityMessages),
+                    borderColor: '#1b6ff5',
+                    backgroundColor: 'rgba(27, 111, 245, .10)',
+                    fill: true,
+                    tension: .35,
+                    pointRadius: 2,
+                },
+                {
+                    label: 'Calls',
+                    data: @json($activityCalls),
+                    borderColor: '#0d3bbf',
+                    backgroundColor: 'rgba(13, 59, 191, .08)',
+                    fill: true,
+                    tension: .35,
+                    pointRadius: 2,
+                },
+                {
+                    label: 'Alerts',
+                    data: @json($activityAlerts),
+                    borderColor: '#dc3d4f',
+                    backgroundColor: 'rgba(220, 61, 79, .08)',
+                    fill: true,
+                    tension: .35,
+                    pointRadius: 2,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, ticks: { precision: 0 } },
+            },
+        },
+    });
+})();
+</script>
+@endpush
