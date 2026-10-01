@@ -1,7 +1,13 @@
 # Render free deployment plan
 
-Status: code is pushed to GitHub (`main` = `b34616c`). Create the Render service using the
-steps below; `render.yaml` is a Blueprint, but the manual flow is just as quick.
+Status: **live** at https://rc-monitor.onrender.com (deployed commit `ef6d589`); demo login
+`test@example.com` / `password` and the admin area were verified. The free instance sleeps
+after ~15 min idle, and the first visit takes ~30–60 s to wake and re-seed. Keep the steps
+below for redeploys.
+
+Note: production seeding uses the model factories, which call `fake()`. Laravel only
+defines `fake()` when `fakerphp/faker` is installed, so it lives in `require` (not
+`require-dev`) — otherwise `composer install --no-dev` breaks `migrate --seed`.
 
 ## Prerequisite
 
