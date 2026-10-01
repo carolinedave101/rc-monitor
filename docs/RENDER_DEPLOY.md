@@ -1,21 +1,24 @@
 # Render free deployment plan
 
-Status: waiting for the Docker commits to be pushed to GitHub, then create the Render
-service (steps below). `render.yaml` is a Blueprint, but the manual flow is just as quick.
+Status: code is pushed to GitHub (`main` = `b34616c`). Create the Render service using the
+steps below; `render.yaml` is a Blueprint, but the manual flow is just as quick.
 
 ## Prerequisite
 
-The GitHub repository (public) must contain the Docker commits:
+The repo is **private**, so Render's “Public Git repository” option reports
+“Repository not found”. Either:
 
-```bash
-git push origin main
-```
+- connect GitHub in Render: **New + → Web Service → GitHub** → authorize the Render GitHub
+  App and pick `carolinedave101/rc-monitor` (private repos work on the free plan), or
+- make the repo public first: GitHub → repo **Settings → General → Danger Zone → Change
+  visibility → Make public**.
 
 ## Option A — manual web service (recommended)
 
 1. Sign up at https://render.com (GitHub sign-in works).
-2. **New +** → **Web Service** → **Public Git repository** → paste
-   `https://github.com/carolinedave101/rc-monitor`.
+2. **New +** → **Web Service** → **GitHub** → authorize the Render GitHub App and select
+   `carolinedave101/rc-monitor` (use **Public Git repository** instead if you made it
+   public).
 3. Settings:
    - Language/Runtime: **Docker**
    - Instance Type: **Free**
