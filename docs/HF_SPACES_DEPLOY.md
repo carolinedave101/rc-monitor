@@ -44,7 +44,7 @@ Local `main` is 3 commits ahead of GitHub (`origin/main`) — push with `git pus
    Render injects `$PORT` (entrypoint already honours it) and serves
    `https://<name>.onrender.com`. Free instance sleeps after ~15 min idle with an
    ephemeral disk (demo data resets on wake/redeploy), and the entrypoint runs the
-   scheduler while awake.
+   scheduler while awake. See `docs/RENDER_DEPLOY.md`.
 2. **Google Cloud e2-micro Always Free VM** — most reliable forever-free option. Needs a
    Google account with a card for verification, ~30–45 min setup (Docker or nginx + PHP,
    plus cron for `schedule:run`).

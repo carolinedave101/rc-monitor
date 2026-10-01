@@ -157,6 +157,7 @@ php artisan test
 - Health: `GET /up` and the **Admin → System** page.
 - Deployment guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 - Free Hugging Face Spaces deployment: [docs/HF_SPACES_DEPLOY.md](docs/HF_SPACES_DEPLOY.md)
+- Free Render deployment: [docs/RENDER_DEPLOY.md](docs/RENDER_DEPLOY.md)
 
 ## Project layout
 

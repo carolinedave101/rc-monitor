@@ -9,6 +9,12 @@ if [ -z "${APP_KEY:-}" ]; then
     echo "APP_KEY=${APP_KEY}" >> .env
 fi
 
+if [ -z "${APP_URL:-}" ] && [ -n "${RENDER_EXTERNAL_URL:-}" ]; then
+    APP_URL="${RENDER_EXTERNAL_URL}"
+    export APP_URL
+    echo "APP_URL=${APP_URL}" >> .env
+fi
+
 touch database/database.sqlite
 
 php artisan migrate --force --seed
